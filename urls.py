@@ -11,6 +11,7 @@ if settings.IS_PUBLIC:
         #url(r'^rest/', include('REST.urls')),
         url(r'^$', views.hem_landing_page),
         url(r'^popgen/?$', views.hem_popgen),
+        url(r'^results/?$', views.hem_results),
         #url(r'^$', views.qed_splash_page_intranet),
         # url(r'^admin/', include(admin.site.urls)),
     ]
@@ -20,6 +21,8 @@ else:
         #url(r'^rest/', include('REST.urls')),
         url(r'^$', views.hem_landing_page),
         url(r'^popgen/?$', views.hem_popgen),
+        url(r'^results/?$', views.hem_results),
+        # url(r'^$', views.qed_splash_page_intrane
         #url(r'^$', views.qed_splash_page_intranet),
         # url(r'^admin/', include(admin.site.urls)),
     ]

@@ -1,10 +1,22 @@
 from django.template.loader import render_to_string
 from django.http import HttpResponse, HttpResponseRedirect
-from django.conf import settings
 #import links_left
-# import os
+import os, tempfile, zipfile
 #import secret
 from django.conf import settings
+from wsgiref.util import FileWrapper
+import mimetypes
+
+
+def send_file(request):
+    filename = "../static_qed/hem/files/example.csv"  # Select your file here.
+    download_name = "example.csv"
+    wrapper = FileWrapper(open(filename))
+    content_type = mimetypes.guess_type(filename)[0]
+    response = HttpResponse(wrapper, content_type=content_type)
+    response['Content-Length'] = os.path.getsize(filename)
+    response['Content-Disposition'] = "attachment; filename=%s" % download_name
+    return response
 
 
 def hem_landing_page(request):
@@ -43,7 +55,12 @@ def file_not_found(request):
 
 def hem_popgen(request):
     html = render_to_string('hem_popgen.html', {})
-    is_dev = settings.IS_DEVELOPMENT
+    response = HttpResponse()
+    response.write(html)
+    return response
+
+def hem_results(request):
+    html = render_to_string('hem_results.html', {})
     response = HttpResponse()
     response.write(html)
     return response
