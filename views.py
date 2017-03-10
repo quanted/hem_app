@@ -18,7 +18,7 @@ def send_file(request):
     content_type = mimetypes.guess_type(filename)[0]
     response = HttpResponse(wrapper, content_type=content_type)
     response['Content-Length'] = os.path.getsize(filename)
-    response['Content-Disposition'] = "attachment; filename=%s" % download_name
+    response['Content-Disposition'] = "attachment; filename={0!s}".format(download_name)
     return response
 
 
