@@ -1,6 +1,6 @@
 from django.template.loader import render_to_string
 from django.http import HttpResponse, HttpResponseRedirect
-from django.shortcuts import render
+from django.shortcuts import render, render_to_response
 #import links_left
 import os, tempfile, zipfile
 #import secret
@@ -8,6 +8,7 @@ from django.conf import settings
 from wsgiref.util import FileWrapper
 import mimetypes
 from .forms import HemForm
+from .models import Category
 
 
 def send_file(request):
@@ -56,15 +57,19 @@ def file_not_found(request):
 
 
 def hem_popgen(request):
+    category_types = Category.objects.all()
 
     if request.method == 'POST':
         form = HemForm(request.POST)
         if form.is_valid():
             form.save(commit=True)
-        return HttpResponseRedirect('hem_results')
+        return HttpResponseRedirect('results')
     else:
         form = HemForm()
-        return render(request, 'hem_popgen.html', {'form': form})
+        return render(request,
+                      'hem_popgen.html',
+                      {'form': form},
+                      {'category_types': category_types})
 
 
 def hem_results(request):

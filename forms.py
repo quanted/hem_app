@@ -6,5 +6,5 @@ class HemForm(forms.ModelForm):
 
     class Meta:
         model = RunHistory
-        fields = ('products', 'population_size', 'gender', 'categories')
+        fields = ('categories', 'products', 'population_size', 'gender')
 
