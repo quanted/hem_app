@@ -4,6 +4,7 @@ from category import Category
 
 
 class Product(models.Model):
+    """ Product model """
     sheds_id = models.TextField(max_length=50, blank=True)
     sheds_product_category_id = models.TextField(max_length=50, blank=True)
     puc_id = models.TextField(blank=True)

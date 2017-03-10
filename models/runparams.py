@@ -2,6 +2,7 @@ from django.db import models
 
 
 class RunParams(models.Model):
+    """ Model for storing params for each run """
     ethnicity = models.CharField(max_length=20, default="NMO")
     gender = models.CharField(max_length=1, default="B")
     min_age = models.PositiveSmallIntegerField(default=0)

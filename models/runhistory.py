@@ -3,6 +3,7 @@ from hem_app.models.category import Category
 
 
 class RunHistory(models.Model):
+    """ Run History Model """
     products = models.BooleanField(default=True)
     categories = models.ForeignKey(Category, on_delete=models.CASCADE)
 

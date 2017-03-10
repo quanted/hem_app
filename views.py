@@ -12,6 +12,7 @@ from .models import Category
 
 
 def send_file(request):
+    """returns a static file for testing"""
     filename = "../static_qed/hem/files/example.csv"  # Select your file here.
     download_name = "example.csv"
     wrapper = FileWrapper(open(filename))
@@ -57,6 +58,7 @@ def file_not_found(request):
 
 
 def hem_popgen(request):
+    """ Main landing and form for hem_app """
     category_types = Category.objects.all()
 
     if request.method == 'POST':
@@ -73,6 +75,7 @@ def hem_popgen(request):
 
 
 def hem_results(request):
+    """ Landing page for results of model run """
     html = render_to_string('hem_results.html', {})
     response = HttpResponse()
     response.write(html)
