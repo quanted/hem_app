@@ -6,7 +6,7 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
+    # auto generated RunParams
     dependencies = [
         ('hem_app', '0004_category_description'),
     ]

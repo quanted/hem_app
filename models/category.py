@@ -13,3 +13,4 @@ class Category(models.Model):
 
     class Meta:
         ordering = ('title',)
+

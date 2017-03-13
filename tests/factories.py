@@ -3,6 +3,7 @@ from hem_app.models import Product, Category, ProductAssignment, RunHistory, Run
 
 
 class ProductFactory(factory.Factory):
+    # Products Factory
     class Meta:
         model = Product
 
@@ -14,6 +15,7 @@ class ProductFactory(factory.Factory):
 
 
 class CategoryFactory(factory.Factory):
+    # Categories Factory
     class Meta:
         model = Category
 
@@ -22,6 +24,7 @@ class CategoryFactory(factory.Factory):
 
 
 class ProductAssignmentFactory(factory.Factory):
+    # Product Assignments Factory
     class Meta:
         model = ProductAssignment
 
@@ -30,6 +33,7 @@ class ProductAssignmentFactory(factory.Factory):
 
 
 class RunHistoryFactory(factory.Factory):
+    # Run History Factory
     class Meta:
         model = RunHistory
 
@@ -42,6 +46,7 @@ class RunHistoryFactory(factory.Factory):
 
 
 class RunParamsFactory(factory.Factory):
+    # Run Params Factory
     class Meta:
         model = RunParams
 
