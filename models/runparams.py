@@ -14,7 +14,7 @@ class RunParams(models.Model):
     updated_at = models.DateTimeField(auto_now=True, editable=False)
 
     def __str__(self):
-        return self.population_size
+        return str(self.population_size)
 
     class Meta:
         ordering = ('population_size',)

@@ -7,7 +7,7 @@ import django.utils.timezone
 
 
 class Migration(migrations.Migration):
-
+    # auto generated category
     dependencies = [
         ('hem_app', '0003_auto_20170302_1522'),
     ]
