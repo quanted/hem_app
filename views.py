@@ -12,7 +12,7 @@ from .models import Category
 
 
 def send_file(request):
-    """returns a static file for testing"""
+    """ returns a static file for testing """
     filename = "../static_qed/hem/files/example.csv"  # Select your file here.
     download_name = "example.csv"
     wrapper = FileWrapper(open(filename))

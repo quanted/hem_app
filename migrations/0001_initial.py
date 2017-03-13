@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-    # auto generated RunHistory
+    """ auto generated RunHistory """
     initial = True
 
     dependencies = [

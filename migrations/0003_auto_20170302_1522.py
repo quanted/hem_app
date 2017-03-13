@@ -8,7 +8,7 @@ import django.utils.timezone
 
 
 class Migration(migrations.Migration):
-    # auto generated Category
+    """ auto generated Category """
     dependencies = [
         ('hem_app', '0002_product'),
     ]

@@ -6,7 +6,7 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-    # auto generated product
+    """ auto generated product """
     dependencies = [
         ('hem_app', '0006_auto_20170307_1046'),
     ]

@@ -7,7 +7,7 @@ import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
-    # auto generated run history
+    """ auto generated run history """
     dependencies = [
         ('hem_app', '0009_auto_20170308_0813'),
     ]

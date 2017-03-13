@@ -7,7 +7,7 @@ import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
-    # auto generated Product Assignment
+    """ auto generated Product Assignment """
     dependencies = [
         ('hem_app', '0005_auto_20170306_1437'),
     ]
