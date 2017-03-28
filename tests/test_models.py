@@ -74,6 +74,10 @@ class CategoryTestCase(TestCase):
         category = CategoryFactory()
         self.assertEquals(str(category), category.title)
 
+    def test_get_top_level(self):
+        category = CategoryFactory()
+        self.assertEquals(category.get_top_level, NULL)
+
 
 class ProductAssignmentTestCase(TestCase):
     """ Unit tests for Product Assignments """
