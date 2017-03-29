@@ -6,6 +6,7 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
+    """ auto generated run history """
 
     dependencies = [
         ('hem_app', '0013_auto_20170328_1523'),

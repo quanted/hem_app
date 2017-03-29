@@ -7,6 +7,7 @@ import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
+    """ auto generated run history """
 
     dependencies = [
         ('hem_app', '0011_category_parent'),
