@@ -1,5 +1,6 @@
 from .category import Category
-from .assignment import ProductAssignment
+from .assignment import Assignment
+from .producttrait import ProductTrait
 from .product import Product
 from .runhistory import RunHistory
 from .runparams import RunParams
