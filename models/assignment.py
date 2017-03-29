@@ -1,7 +1,7 @@
 from django.db import models
 
 
-class ProductAssignment(models.Model):
+class Assignment(models.Model):
     """ Product assignment Model"""
     short_title = models.TextField(max_length=2)
     title = models.TextField(max_length=75)
