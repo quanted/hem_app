@@ -1,5 +1,5 @@
 from django.db import models
-from .category import Category
+from hem_app.models.category import Category
 
 
 class RunHistory(models.Model):
