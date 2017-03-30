@@ -7,7 +7,7 @@ import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
-
+    '''Auto Generated Migration Files'''
     initial = True
 
     dependencies = [
