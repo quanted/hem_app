@@ -12,7 +12,7 @@ class Product(models.Model):
     updated_at = models.DateTimeField(auto_now=True, editable=False)
 
     def __str__(self):
-        return self.product_type
+        return self.title
 
     class Meta:
         ordering = ('title',)

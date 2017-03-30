@@ -12,9 +12,9 @@ class Category(models.Model):
     def __str__(self):
         return self.title
 
-    def get_top_level(self):
-        return self.parent == NULL
-
     class Meta:
         ordering = ('title',)
+
+    def get_top_level(self):
+        return self.parent == NULL
 
