@@ -1,7 +1,8 @@
-from .category import Category
 from .assignment import Assignment
-from .product import Product
-from .runhistory import RunHistory
-from .runparams import RunParams
+from .category import Category
 from .person import Person
+from .runhistory import RunHistory
+from .product import Product
+from .runparams import RunParams
 from .trait import Trait
+
