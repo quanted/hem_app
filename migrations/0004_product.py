@@ -7,7 +7,7 @@ import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
-
+    '''Auto Generated Migration Files'''
     dependencies = [
         ('hem_app', '0003_person'),
     ]
