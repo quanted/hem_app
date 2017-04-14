@@ -19,6 +19,8 @@ class Chemical(models.Model):
     half_air_hr = models.DecimalField(decimal_places=10, max_digits=16)
     removal = models.DecimalField(decimal_places=4, max_digits=11)
     kp = models.DecimalField(decimal_places=4, max_digits=11)
+    created_at = models.DateTimeField(auto_now_add=True, editable=False)
+    updated_at = models.DateTimeField(auto_now=True, editable=False)
 
     def __str__(self):
         return self.dtxrid + ', ' + self.title

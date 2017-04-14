@@ -9,7 +9,7 @@ class Assignment(models.Model):
     updated_at = models.DateTimeField(auto_now=True, editable=False)
 
     def __str__(self):
-        return self.short_title + ', ' + self.title
+        return self.title
 
     class Meta:
         ordering = ('title',)
