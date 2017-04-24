@@ -1,6 +1,6 @@
 import factory
 # from factories import ProductFactory, ProductAssignmentFactory, CategoryFactory, RunHistoryFactory, RunParamsFactory
-from hem_app.models import Product, Category, ProductAssignment, RunHistory, RunParams
+from hem_app.models import Product, Category, Assignment, RunHistory, RunParams
 from django.test import TestCase
 
 
@@ -10,9 +10,7 @@ class ProductFactory(factory.Factory):
         model = Product
 
     category_id = 1
-    puc_id = "1234566Y"
-    product_type = "Luggage"
-    product_type_refined = "Handbag"
+    title = "Luggage"
     description = "Leather, Gucci"
 
 
@@ -25,10 +23,10 @@ class CategoryFactory(factory.Factory):
     description = "Stuff used to carry other stuff around"
 
 
-class ProductAssignmentFactory(factory.Factory):
-    """ Product Assignments Factory """
+class AssignmentFactory(factory.Factory):
+    """ Assignments Factory """
     class Meta:
-        model = ProductAssignment
+        model = Assignment
 
     short_title = "Some title"
     title = "A longer title"
@@ -65,7 +63,7 @@ class ProductTestCase(TestCase):
     """ Unit tests for Products """
     def test_string_representation(self):
         product = ProductFactory()
-        self.assertEquals(str(product), product.product_type)
+        self.assertEquals(str(product), product.title)
 
 
 class CategoryTestCase(TestCase):
@@ -79,12 +77,11 @@ class CategoryTestCase(TestCase):
         self.assertEquals(category.get_top_level, NULL)
 
 
-class ProductAssignmentTestCase(TestCase):
+class AssignmentTestCase(TestCase):
     """ Unit tests for Product Assignments """
     def test_string_representation(self):
-        productassignment = ProductAssignmentFactory()
-        x = productassignment.short_title + ', ' + productassignment.title
-        self.assertEquals(str(productassignment), x)
+        assignment = AssignmentFactory()
+        self.assertEquals(str(assignment), assignment.title)
 
 
 class RunHistoryTestCase(TestCase):

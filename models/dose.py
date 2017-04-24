@@ -3,7 +3,7 @@ from django.db import models
 
 class Dose(models.Model):
     """ Product Dose Model """
-    run_id = models.ForeignKey('RunParams', on_delete=models.CASCADE)
+    dataset_id = models.IntegerField(default=1)
     chemical = models.ForeignKey('Chemical', on_delete=models.CASCADE)
     person = models.ForeignKey('Person', on_delete=models.CASCADE)
     day = models.IntegerField()
