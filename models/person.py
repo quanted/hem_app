@@ -8,7 +8,7 @@ class Person(models.Model):
     race = models.CharField(max_length=1)
     ethnicity = models.CharField(max_length=1, default='W')
     age_years = models.IntegerField(default=1)
-    ages = models.CharField(max_length=50)
+    ages = models.TextField(max_length=30)
     baths = models.IntegerField(default=1)
     bsa_adj = models.DecimalField(max_digits=10, decimal_places=3, default=0)
     cars = models.IntegerField(default=1)
