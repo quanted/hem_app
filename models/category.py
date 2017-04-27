@@ -14,7 +14,3 @@ class Category(models.Model):
 
     class Meta:
         ordering = ('title',)
-
-    def get_all_top_level(self):
-        return self.objects.filter(parent='')
-

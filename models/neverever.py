@@ -3,7 +3,7 @@ from django.db import models
 
 class Neverever(models.Model):
     """ Product Category Model """
-    puc_id = models.TextField(max_length=120, default='')
+    product = models.ForeignKey('Product', on_delete=models.CASCADE)
     no2017 = models.BooleanField(default=False)
     hup = models.BooleanField(default=False)
     iup = models.BooleanField(default=False)
@@ -20,6 +20,7 @@ class Neverever(models.Model):
     age6_12 = models.BooleanField(default=False)
     age13_15 = models.BooleanField(default=False)
     age16_18 = models.BooleanField(default=False)
+    age19_49 = models.BooleanField(default=False)
     age50plus = models.BooleanField(default=False)
     kownrent = models.BooleanField(default=False)
     sewdis = models.BooleanField(default=False)
@@ -36,7 +37,7 @@ class Neverever(models.Model):
     updated_at = models.DateTimeField(auto_now=True, editable=False)
 
     def __str__(self):
-        return self.puc_id
+        return self.id
 
     class Meta:
-        ordering = ('puc_id',)
+        ordering = ('id',)
