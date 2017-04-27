@@ -3,7 +3,8 @@ from django.db import models
 
 class Habit(models.Model):
     """  Habit Model """
-    puc_id = models.TextField(max_length=120, default='')
+
+    product = models.ForeignKey('Person', on_delete=models.CASCADE)
     variable_value = models.TextField(max_length=25, default='')
     units = models.TextField(max_length=25, default='')
     gender = models.CharField(max_length=1)

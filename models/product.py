@@ -5,6 +5,7 @@ class Product(models.Model):
     """ Product model """
     title = models.TextField(max_length=255)
     description = models.TextField(blank=True)
+    puc_id = models.TextField(max_length=120, default='')
     assignment = models.ForeignKey('Assignment', on_delete=models.CASCADE, default=1)
     traits = models.ForeignKey('Trait', on_delete=models.CASCADE)
     category = models.ForeignKey('Category', on_delete=models.CASCADE)

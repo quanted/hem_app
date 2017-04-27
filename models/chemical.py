@@ -16,7 +16,7 @@ class Chemical(models.Model):
     half_sediment_hr = models.IntegerField()
     half_soil_hr = models.IntegerField()
     half_water_hr = models.IntegerField()
-    half_air_hr = models.DecimalField(decimal_places=10, max_digits=16)
+    half_air_hr = models.DecimalField(decimal_places=10, max_digits=20)
     removal = models.DecimalField(decimal_places=4, max_digits=11)
     kp = models.DecimalField(decimal_places=4, max_digits=11)
     created_at = models.DateTimeField(auto_now_add=True, editable=False)

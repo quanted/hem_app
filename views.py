@@ -119,7 +119,7 @@ def get_json_data(request):
 def query_category(request):
     parent_id = request.GET.get('care_id', None)
     data = list(Category.objects.filter(parent_id=parent_id).values('id', 'title'))  #.values_list('id', 'title'))
-    return JsonResponse({'care_id' : data }, content_type="application/json", safe=True)
+    return JsonResponse({'care_id': data }, content_type="application/json", safe=True)
 
 
 #class get_results(APIView):
