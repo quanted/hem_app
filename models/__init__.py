@@ -7,7 +7,7 @@ from .runhistory import RunHistory
 from .product import Product
 from .runparams import RunParams
 from .trait import Trait
-from .behave_activity import Behave_Activity
-from .behave_person import Behave_Person
 from .habit import Habit
 from .neverever import Neverever
+from .composition import Composition
+from .behavior import Behavior
