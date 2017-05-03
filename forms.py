@@ -8,12 +8,12 @@ from crispy_forms.bootstrap import TabHolder, Tab
 # <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><
 
 
-class popgenForm(forms.Form):
-    population_field = forms.IntegerField(min_value=0,
-                                          initial='1000000',
-                                          label='Population Size',
-                                          error_messages={'min_value': 'Negative number is not allowed'},
-                                          widget=forms.NumberInput(attrs={'onchange': "populationsync(value);"}))
+# class popgenForm(forms.Form):
+#     population_field = forms.IntegerField(min_value=0,
+#                                           initial='1000000',
+#                                           label='Population Size',
+#                                           error_messages={'min_value': 'Negative number is not allowed'},
+#                                           widget=forms.NumberInput(attrs={'onchange': "populationsync(value);"}))
 
 # <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><
 # Unable to user modelForm because we need to filter data and
@@ -24,5 +24,5 @@ class HemForm(forms.ModelForm):
 
     class Meta:
         model = RunHistory
-        fields = ('categories', 'products', 'population_size')
+        fields = ('categories', 'products',)
 

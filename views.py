@@ -1,13 +1,11 @@
 from django.template.loader import render_to_string
 from django.http import HttpResponse, HttpResponseRedirect, Http404, JsonResponse
 from django.shortcuts import render, render_to_response
-#import links_left
 import os, tempfile, zipfile, json
-#import secret
 from django.conf import settings
 from wsgiref.util import FileWrapper
 import mimetypes
-from .forms import HemForm, popgenForm
+from .forms import HemForm
 from .models import Category, RunHistory
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -62,13 +60,12 @@ def file_not_found(request):
 def hem_popgen(request):
     """ Main landing and form for hem_app """
     all_categories = Category.objects.filter(parent=None).values_list('id', 'title')
-    form = popgenForm(request.POST)
+    form = HemForm(request.POST)
     if request.method == 'POST':
         if form.is_valid():
             sub_category = request.POST.get('sub_category', -1)
             category = Category.objects.get(id=sub_category) #form.cleaned_data['sub_category1'])
-            product= request.POST.get('toggleProducts', True)
-            population_size = form.cleaned_data.get('population_field')
+            product = request.POST.get('toggleProducts', True)
             gender = request.POST['optionsRadiosGender']
             age_radio = request.POST['optionsRadiosAge']
             min_age = 0
@@ -91,13 +88,14 @@ def hem_popgen(request):
             elif age_radio == 'age6':
                 min_age = 49
                 mix_age = 99
-            history = RunHistory(categories=category, products=product, population_size=population_size,
+            history = RunHistory(categories=category, products=product,
                                  gender=gender, min_age=min_age, max_age=mix_age)
             history.save()
-            return HttpResponseRedirect('results',  { 'all_historyRows': all_categories })
-        else: raise Http404('Unable to save population generation data..')
+            return HttpResponseRedirect('results',  {'all_historyRows': all_categories})
+        else:
+            raise Http404('Unable to save population generation data..')
     else:
-        form = popgenForm()
+        form = HemForm()
         return render(request, 'hem_popgen.html', {'form': form, 'all_categories': all_categories })
 
 
