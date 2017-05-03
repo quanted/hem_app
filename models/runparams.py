@@ -10,6 +10,7 @@ class RunParams(models.Model):
     pop_gen_seed = models.PositiveIntegerField(default=1)
     population_size = models.PositiveIntegerField(default=10000)
     race = models.CharField(max_length=20, default="WBNAPO")
+    category = models.ForeignKey('Category', on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
     updated_at = models.DateTimeField(auto_now=True, editable=False)
 

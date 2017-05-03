@@ -5,7 +5,8 @@ from hem_app.models.category import Category
 class RunHistory(models.Model):
     """ Run History Model """
     products = models.BooleanField(default=True)
-    categories = models.ForeignKey(Category, on_delete=models.CASCADE)
+    categories = models.ForeignKey('Category', on_delete=models.CASCADE)
+    chemical = models.ForeignKey('Chemical', on_delete=models.CASCADE)
     gender = models.CharField(max_length=1, default="B")
     population_size = models.PositiveIntegerField(default=10000)
     min_age = models.PositiveSmallIntegerField(default=0)

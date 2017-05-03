@@ -3,7 +3,7 @@ from django.db import models
 
 class Chemical(models.Model):
     """ Product Dose Model """
-    dtxrid = models.TextField(max_length=50)
+    dtxsid = models.TextField(max_length=50)
     title = models.TextField(max_length=255)
     cas = models.TextField(max_length=75)
     mw = models.DecimalField(decimal_places=4, max_digits=11)
@@ -26,4 +26,4 @@ class Chemical(models.Model):
         return self.dtxrid + ', ' + self.title
 
     class Meta:
-        ordering = ('title', 'dtxrid',)
+        ordering = ('title', 'dtxsid',)
