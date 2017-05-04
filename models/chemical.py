@@ -6,6 +6,7 @@ class Chemical(models.Model):
     dtxsid = models.TextField(max_length=50)
     title = models.TextField(max_length=255)
     cas = models.TextField(max_length=75)
+    fabs = models.DecimalField(decimal_places=3, max_digits=4)
     mw = models.DecimalField(decimal_places=4, max_digits=11)
     vp_pa = models.DecimalField(decimal_places=10, max_digits=20)
     log_kow = models.DecimalField(decimal_places=4, max_digits=11)
