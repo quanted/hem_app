@@ -1,7 +1,10 @@
 from django.template.loader import render_to_string
 from django.http import HttpResponse, HttpResponseRedirect, Http404, JsonResponse
 from django.shortcuts import render, render_to_response
-import os, tempfile, zipfile, json
+import os
+import tempfile
+import zipfile
+import json
 from django.conf import settings
 from wsgiref.util import FileWrapper
 import mimetypes
@@ -29,10 +32,10 @@ def hem_landing_page(request):
     html += render_to_string('02epa_drupal_header_bluestripe.html', {})
     html += render_to_string('03epa_drupal_section_title.html', {})
     if settings.IS_PUBLIC:
-        html += render_to_string('hem_popgen.html', {'title': 'Human Exposure Model'})
+        html += render_to_string('hem_index.html', {'title': 'Human Exposure Model'})
         pass
     else:
-        html += render_to_string('hem_popgen.html', {'title': 'Human Exposure Model'})
+        html += render_to_string('hem_index.html', {'title': 'Human Exposure Model'})
         pass
     html += render_to_string('09epa_drupal_splashscripts.html', {})
     html += render_to_string('10epa_drupal_footer.html', {})
@@ -57,7 +60,7 @@ def file_not_found(request):
     return response
 
 
-def hem_popgen(request):
+def hem_index(request):
     """ Main landing and form for hem_app """
     all_categories = Category.objects.filter(parent=None).values_list('id', 'title')
     form = HemForm(request.POST)
@@ -96,7 +99,7 @@ def hem_popgen(request):
             raise Http404('Unable to save population generation data..')
     else:
         form = HemForm()
-        return render(request, 'hem_popgen.html', {'form': form, 'all_categories': all_categories })
+        return render(request, 'hem_index.html', {'form': form, 'all_categories': all_categories})
 
 
 def hem_results(request):
@@ -120,16 +123,4 @@ def query_category(request):
     return JsonResponse({'care_id': data }, content_type="application/json", safe=True)
 
 
-#class get_results(APIView):
-#    authentication_classes = ()
-#    permission_classes = ()
-
-#    def get(self, request, format=None):
-#        gender = [data.gender for data in RunHistory.objects.all()]
-#        population_size = [data.population_size for data in RunHistory.objects.all()]
-#        data = {
-#            'Gender': gender,
-#            'Popupation': population_size
-#        }
-#        return Response(data)
 
