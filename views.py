@@ -1,6 +1,6 @@
 from django.template.loader import render_to_string
 from django.http import HttpResponse, HttpResponseRedirect, Http404, JsonResponse
-from django.shortcuts import render, render_to_response
+from django.shortcuts import render, render_to_response, redirect
 import os
 import tempfile
 import zipfile
@@ -8,12 +8,12 @@ import json
 from django.conf import settings
 from wsgiref.util import FileWrapper
 import mimetypes
-from .forms import ProductForm
+from .forms import RunForm
 from .models import Category, RunHistory, Dose, Chemical
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from dal import autocomplete
-
+from django.utils import timezone
 
 def send_file(request):
     """ returns a static file for testing """
@@ -96,7 +96,7 @@ def hem_popgen(request):
             history = RunHistory(categories=category, products=product, population_size=population_size,
                                  gender=gender, min_age=min_age, max_age=mix_age)
             history.save()
-            return HttpResponseRedirect('results',  { 'all_historyRows': all_categories })
+            return HttpResponseRedirect('results',  {'all_historyRows': all_categories})
         else: raise Http404('Unable to save population generation data..')
     else:
            return render(request, 'hem_popgen.html', {'form': pform, 'all_categories': all_categories })
@@ -105,16 +105,28 @@ def hem_popgen(request):
 def hem_results(request):
     """ Landing page for results of model run """
     all_history = RunHistory.objects.all()
-    html = render_to_string('hem_results.html', {'all_history':all_history })
+    html = render_to_string('hem_results.html', {'all_history': all_history})
     response = HttpResponse()
     response.write(html)
     return response
 
 def hem_index(request):
-    html = render_to_string('hem_index.html',)
-    response = HttpResponse()
-    response.write(html)
-    return response
+    if request.method =="POST":
+        form = RunForm(request.POST)
+        if form.is_valid():
+	        population_size = form.cleaned_data.get('population_field')
+	        history.population_size = population_size
+	        history = form.save(commit=False)
+	        history.chemical_id = 1
+	        history.categories_id = 1
+	        history.created_at = timezone.now()
+	        history.updated_at = timezone.now()
+	        history.save()
+	        return HttpResponseRedirect('results')
+	else:
+	    form = RunForm()
+    return render(request, 'hem_index.html', {'form': form})
+
 
 def get_json_data(request):
     #data1 = [data.gender and data.population_size  for data in RunHistory.objects.all()]
@@ -128,6 +140,12 @@ def query_category(request):
     return JsonResponse({'care_id': data }, content_type="application/json", safe=True)
 
 
-def chemical_autocomplete(self):
-    data = list(Chemical.objects.values_list('id', 'cas', 'title').exclude(dose=None))
-    return JsonResponse(data, content_type="application/json", safe=False)
+class ChemicalAutocomplete(autocomplete.Select2QuerySetView):
+
+	def get_queryset(self):
+		data = Chemical.objects.all().exclude(dose=None)
+
+		if self.q:
+			data = data.filter(cas__istartswith=self.q)
+
+		return data

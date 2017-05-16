@@ -1,20 +1,15 @@
 from django import forms
 
-from hem_app.models.runhistory import RunHistory, Category
+from hem_app.models.runhistory import RunHistory
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Fieldset, ButtonHolder, Submit
-from crispy_forms.bootstrap import TabHolder, Tab
+from crispy_forms.layout import Layout, Fieldset, ButtonHolder, Submit, Div, HTML, Button, Row, Field
+from crispy_forms.bootstrap import AppendedText, PrependedText, FormActions
 
 
-class ProductForm(forms.ModelForm):
-    """ Form for Model run """
-
-    class Meta:
-        model = RunHistory
-        fields = ('categories', 'products',)
+class RunForm(forms.ModelForm):
 
 
-class ChemicalForm(forms.ModelForm):
-    model = RunHistory
-    fields = ('categories', 'chemical')
-
+	class Meta:
+		model = RunHistory
+		fields = 'products', 'gender', 'population_size', 'min_age', 'max_age',
+		widgets = {'chemical'}
