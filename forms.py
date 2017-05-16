@@ -6,7 +6,7 @@ from crispy_forms.layout import Layout, Fieldset, ButtonHolder, Submit
 from crispy_forms.bootstrap import TabHolder, Tab
 
 
-class HemForm(forms.ModelForm):
+class ProductForm(forms.ModelForm):
     """ Form for Model run """
 
     class Meta:

@@ -22,5 +22,8 @@ class Dose(models.Model):
     def __str__(self):
         return self.id
 
+    def __unicode__(self):
+        return unicode(self.id) or u''
+
     class Meta:
         ordering = ('id',)

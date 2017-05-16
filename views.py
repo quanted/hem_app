@@ -8,10 +8,11 @@ import json
 from django.conf import settings
 from wsgiref.util import FileWrapper
 import mimetypes
-from .forms import HemForm
-from .models import Category, RunHistory
+from .forms import ProductForm
+from .models import Category, RunHistory, Dose, Chemical
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from dal import autocomplete
 
 
 def send_file(request):
@@ -32,10 +33,10 @@ def hem_landing_page(request):
     html += render_to_string('02epa_drupal_header_bluestripe.html', {})
     html += render_to_string('03epa_drupal_section_title.html', {})
     if settings.IS_PUBLIC:
-        html += render_to_string('hem_index.html', {'title': 'Human Exposure Model'})
+        html += render_to_string('hem_popgen.html', {'title': 'Human Exposure Model'})
         pass
     else:
-        html += render_to_string('hem_index.html', {'title': 'Human Exposure Model'})
+        html += render_to_string('hem_popgen.html', {'title': 'Human Exposure Model'})
         pass
     html += render_to_string('09epa_drupal_splashscripts.html', {})
     html += render_to_string('10epa_drupal_footer.html', {})
@@ -60,15 +61,16 @@ def file_not_found(request):
     return response
 
 
-def hem_index(request):
+def hem_popgen(request):
     """ Main landing and form for hem_app """
     all_categories = Category.objects.filter(parent=None).values_list('id', 'title')
-    form = HemForm(request.POST)
+    pform = ProductForm(request.POST)
     if request.method == 'POST':
-        if form.is_valid():
+        if pform.is_valid():
             sub_category = request.POST.get('sub_category', -1)
             category = Category.objects.get(id=sub_category) #form.cleaned_data['sub_category1'])
-            product = request.POST.get('toggleProducts', True)
+            product= request.POST.get('toggleProducts', True)
+            population_size = form.cleaned_data.get('population_field')
             gender = request.POST['optionsRadiosGender']
             age_radio = request.POST['optionsRadiosAge']
             min_age = 0
@@ -91,15 +93,13 @@ def hem_index(request):
             elif age_radio == 'age6':
                 min_age = 49
                 mix_age = 99
-            history = RunHistory(categories=category, products=product,
+            history = RunHistory(categories=category, products=product, population_size=population_size,
                                  gender=gender, min_age=min_age, max_age=mix_age)
             history.save()
-            return HttpResponseRedirect('results',  {'all_historyRows': all_categories})
-        else:
-            raise Http404('Unable to save population generation data..')
+            return HttpResponseRedirect('results',  { 'all_historyRows': all_categories })
+        else: raise Http404('Unable to save population generation data..')
     else:
-        form = HemForm()
-        return render(request, 'hem_index.html', {'form': form, 'all_categories': all_categories})
+           return render(request, 'hem_popgen.html', {'form': pform, 'all_categories': all_categories })
 
 
 def hem_results(request):
@@ -110,6 +110,11 @@ def hem_results(request):
     response.write(html)
     return response
 
+def hem_index(request):
+    html = render_to_string('hem_index.html',)
+    response = HttpResponse()
+    response.write(html)
+    return response
 
 def get_json_data(request):
     #data1 = [data.gender and data.population_size  for data in RunHistory.objects.all()]
@@ -123,4 +128,6 @@ def query_category(request):
     return JsonResponse({'care_id': data }, content_type="application/json", safe=True)
 
 
-
+def chemical_autocomplete(self):
+    data = list(Chemical.objects.values_list('id', 'cas', 'title').exclude(dose=None))
+    return JsonResponse(data, content_type="application/json", safe=False)
