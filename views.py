@@ -10,8 +10,8 @@ from wsgiref.util import FileWrapper
 import mimetypes
 from .forms import RunForm
 from .models import Category, RunHistory, Dose, Chemical
-from rest_framework.views import APIView
-from rest_framework.response import Response
+# from rest_framework.views import APIView
+# from rest_framework.response import Response
 from dal import autocomplete
 from django.utils import timezone
 
@@ -111,8 +111,9 @@ def hem_results(request):
     return response
 
 def hem_index(request):
-    if request.method =="POST":
-        form = RunForm(request.POST)
+	form = RunForm()
+	if request.method =="POST":
+		form = RunForm(request.POST)
         if form.is_valid():
 	        population_size = form.cleaned_data.get('population_field')
 	        history.population_size = population_size
@@ -123,9 +124,8 @@ def hem_index(request):
 	        history.updated_at = timezone.now()
 	        history.save()
 	        return HttpResponseRedirect('results')
-	else:
-	    form = RunForm()
-    return render(request, 'hem_index.html', {'form': form})
+
+	return render(request, 'hem_index.html', {'form': form})
 
 
 def get_json_data(request):
@@ -141,9 +141,8 @@ def query_category(request):
 
 
 class ChemicalAutocomplete(autocomplete.Select2QuerySetView):
-
 	def get_queryset(self):
-		data = Chemical.objects.all().exclude(dose=None)
+		data = Chemical.objects.exclude(dose=None)
 
 		if self.q:
 			data = data.filter(cas__istartswith=self.q)

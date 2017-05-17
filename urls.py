@@ -2,6 +2,7 @@
 from django.conf import settings
 from dal import autocomplete
 from django.conf.urls import url
+from django.core.urlresolvers import reverse
 from . import views
 from hem_app.views import ChemicalAutocomplete
 
@@ -15,7 +16,7 @@ if settings.IS_PUBLIC:
         url(r'^index/?$', views.hem_index),
         url(r'^hem_jdata/$', views.get_json_data),
         url(r'^category_list/$', views.query_category),
-        url(r'^chemical-autocomplete/$', ChemicalAutocomplete.as_view, name='chemical-autocomplete'),
+        url(r'^chemical-autocomplete/$', ChemicalAutocomplete.as_view),
         #url(r'^hem_data/?$', views.get_results.as_view()),
         url(r'^results/?$', views.hem_results),
         # url(r'^admin/', include(admin.site.urls)),
@@ -29,7 +30,7 @@ else:
         url(r'^index/?$', views.hem_index),
         url(r'^hem_jdata/$', views.get_json_data),
         url(r'^category_list/$', views.query_category),
-        url(r'^chemical-autocomplete /$', ChemicalAutocomplete.as_view, name='chemical-autocomplete'),
+        url(r'^chemical-autocomplete /$', ChemicalAutocomplete.as_view),
         #url(r'^hem_data/?$', views.get_results.as_view()),
         url(r'^results/?$', views.hem_results),
         # url(r'^$', views.qed_splash_page_intrane

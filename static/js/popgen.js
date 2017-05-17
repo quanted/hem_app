@@ -1,10 +1,9 @@
-/**
- * Created by dlyons on 2/15/2017.
- */
 
+$("#productH2").css("display", "none");
 
-$(function() {
-    $('#toggle-event').change(function() {
-        $('#console-event').html('Toggle: ' + $(this).prop('checked'))
-    })
+$("input[name=inlineRadioOptions]").change(function() {
+  var divId = $(this).attr("id");
+  $("div.pc").hide();
+  $("." + divId).show();
+
 })
