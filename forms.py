@@ -11,5 +11,5 @@ class RunForm(forms.ModelForm):
 
 	class Meta:
 		model = RunHistory
-		fields = 'products', 'gender', 'population_size', 'min_age', 'max_age',
+		fields = 'population_size',
 		widgets = {'chemical'}

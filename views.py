@@ -115,15 +115,41 @@ def hem_index(request):
 	if request.method =="POST":
 		form = RunForm(request.POST)
         if form.is_valid():
-	        population_size = form.cleaned_data.get('population_field')
-	        history.population_size = population_size
-	        history = form.save(commit=False)
-	        history.chemical_id = 1
-	        history.categories_id = 1
-	        history.created_at = timezone.now()
-	        history.updated_at = timezone.now()
-	        history.save()
-	        return HttpResponseRedirect('results')
+            gender = request.POST['optionsRadiosGender']
+            age_radio = request.POST['optionsRadiosAge']
+            chemical_id = request.POST['selectChemical']
+            product = request.POST['inlineRadioOptions']
+            category_id = request.POST['selectProduct']
+            category = Category.objects.get(id=category_id)
+            chemical = Chemical.objects.get(id=chemical_id)
+            population_size = form.cleaned_data.get('population_field')
+            min_age = 0
+            mix_age = 0
+            if age_radio == 'age1':
+                min_age = 0
+                mix_age = 5
+            elif age_radio == 'age2':
+                min_age = 6
+                mix_age = 12
+            elif age_radio == 'age3':
+                min_age = 13
+                mix_age = 15
+            elif age_radio == 'age4':
+                min_age = 16
+                mix_age = 18
+            elif age_radio == 'age5':
+                min_age = 19
+                mix_age = 49
+            elif age_radio == 'age6':
+                min_age = 49
+                mix_age = 99
+            history = RunHistory(categories=category, products=product, chemical=chemical,
+                                 population_size=population_size, gender=gender, min_age=min_age, max_age=mix_age,
+                                 created_at=timezone.now(), updated_at=timezone.now())
+            print(history)
+            history = form.save(commit=False)
+            history.save()
+            return HttpResponseRedirect('results')
 
 	return render(request, 'hem_index.html', {'form': form})
 
