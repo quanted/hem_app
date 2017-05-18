@@ -9,11 +9,12 @@ from django.conf import settings
 from wsgiref.util import FileWrapper
 import mimetypes
 from .forms import RunForm
-from .models import Category, RunHistory, Dose, Chemical
+from .models import Category, RunHistory, Dose, Chemical, Person
 # from rest_framework.views import APIView
 # from rest_framework.response import Response
 from dal import autocomplete
 from django.utils import timezone
+from djqscsv import write_csv, render_to_csv_response
 
 def send_file(request):
     """ returns a static file for testing """
@@ -60,48 +61,6 @@ def file_not_found(request):
     response.write(html)
     return response
 
-
-def hem_popgen(request):
-    """ Main landing and form for hem_app """
-    all_categories = Category.objects.filter(parent=None).values_list('id', 'title')
-    pform = ProductForm(request.POST)
-    if request.method == 'POST':
-        if pform.is_valid():
-            sub_category = request.POST.get('sub_category', -1)
-            category = Category.objects.get(id=sub_category) #form.cleaned_data['sub_category1'])
-            product= request.POST.get('toggleProducts', True)
-            population_size = form.cleaned_data.get('population_field')
-            gender = request.POST['optionsRadiosGender']
-            age_radio = request.POST['optionsRadiosAge']
-            min_age = 0
-            mix_age = 0
-            if age_radio == 'age1':
-                min_age = 0
-                mix_age = 5
-            elif age_radio == 'age2':
-                min_age = 6
-                mix_age = 12
-            elif age_radio == 'age3':
-                min_age = 13
-                mix_age = 15
-            elif age_radio == 'age4':
-                min_age = 16
-                mix_age = 18
-            elif age_radio == 'age5':
-                min_age = 19
-                mix_age = 49
-            elif age_radio == 'age6':
-                min_age = 49
-                mix_age = 99
-            history = RunHistory(categories=category, products=product, population_size=population_size,
-                                 gender=gender, min_age=min_age, max_age=mix_age)
-            history.save()
-            return HttpResponseRedirect('results',  {'all_historyRows': all_categories})
-        else: raise Http404('Unable to save population generation data..')
-    else:
-           return render(request, 'hem_popgen.html', {'form': pform, 'all_categories': all_categories })
-
-
 def hem_results(request):
     """ Landing page for results of model run """
     all_history = RunHistory.objects.all()
@@ -115,43 +74,38 @@ def hem_index(request):
 	if request.method =="POST":
 		form = RunForm(request.POST)
         if form.is_valid():
-            gender = request.POST['optionsRadiosGender']
-            age_radio = request.POST['optionsRadiosAge']
-            chemical_id = request.POST['selectChemical']
-            product = request.POST['inlineRadioOptions']
-            category_id = request.POST['selectProduct']
-            category = Category.objects.get(id=category_id)
-            chemical = Chemical.objects.get(id=chemical_id)
-            population_size = form.cleaned_data.get('population_field')
-            min_age = 0
-            mix_age = 0
-            if age_radio == 'age1':
-                min_age = 0
-                mix_age = 5
-            elif age_radio == 'age2':
-                min_age = 6
-                mix_age = 12
-            elif age_radio == 'age3':
-                min_age = 13
-                mix_age = 15
-            elif age_radio == 'age4':
-                min_age = 16
-                mix_age = 18
-            elif age_radio == 'age5':
-                min_age = 19
-                mix_age = 49
-            elif age_radio == 'age6':
-                min_age = 49
-                mix_age = 99
-            history = RunHistory(categories=category, products=product, chemical=chemical,
-                                 population_size=population_size, gender=gender, min_age=min_age, max_age=mix_age,
-                                 created_at=timezone.now(), updated_at=timezone.now())
-            print(history)
+            chemical = Chemical.objects.get(pk=request.POST.get('selectChemical'))
+            categories = Category.objects.get(pk=request.POST.get('selectProduct'))
+            products = request.POST.get('inlineRadioOptions')
             history = form.save(commit=False)
+            history.created_at = timezone.now()
+            history.updated_at = timezone.now()
+            history.chemical = chemical
+            history.categories = categories
+            history.products = products
             history.save()
-            return HttpResponseRedirect('results')
+            #create the queryset for population csv - should include gender and ages
+            if history.gender == 'B':
+                pop_qs = Person.objects.filter(age_years__gte=history.min_age,
+                                               age_years__lte=history.max_age).values('id', 'gender', 'race',
+                                                                                      'ethnicity', 'age_years', 'ages',
+                                                                                      'genders', 'baths', 'lot',
+                                                                                      'dishwash', 'cwasher', 'swim')
 
-	return render(request, 'hem_index.html', {'form': form})
+            else:
+                pop_qs = Person.objects.filter(gender=history.gender, age_years__gte=history.min_age,
+                                              age_years__lte=history.max_age).values('id', 'gender', 'race',
+                                                                                     'ethnicity', 'age_years', 'ages',
+                                                                                     'genders', 'baths', 'lot',
+                                                                                     'dishwash', 'cwasher', 'swim')
+
+            # name the population csv
+            csvName = 'static_qed/hem/files/population_' + str(history.id) + '.csv'
+            with open(csvName, 'wb') as csv_file:
+                write_csv(pop_qs, csv_file)
+
+            return HttpResponseRedirect('results')
+        return render(request, 'hem_index.html', {'form': form})
 
 
 def get_json_data(request):
@@ -166,11 +120,11 @@ def query_category(request):
     return JsonResponse({'care_id': data }, content_type="application/json", safe=True)
 
 
-class ChemicalAutocomplete(autocomplete.Select2QuerySetView):
-	def get_queryset(self):
-		data = Chemical.objects.exclude(dose=None)
+#class ChemicalAutocomplete(autocomplete.Select2QuerySetView):
+#	def get_queryset(self):
+#		data = Chemical.objects.exclude(dose=None)
 
-		if self.q:
-			data = data.filter(cas__istartswith=self.q)
+#		if self.q:
+#			data = data.filter(cas__istartswith=self.q)
 
-		return data
+#		return data

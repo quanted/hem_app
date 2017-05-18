@@ -1,15 +1,29 @@
 from django import forms
 
-from hem_app.models.runhistory import RunHistory
-from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Fieldset, ButtonHolder, Submit, Div, HTML, Button, Row, Field
-from crispy_forms.bootstrap import AppendedText, PrependedText, FormActions
+from hem_app.models import RunHistory, Category, Chemical, Dose
 
+GENDER_CHOICES = (
+	('B', 'Both'),
+	('F', 'Female'),
+	('M', 'Male')
+)
+
+PRODUCT_CHOICES = (
+	('1', 'Products'),
+	('0', 'Chemicals')
+)
 
 class RunForm(forms.ModelForm):
-
-
 	class Meta:
 		model = RunHistory
-		fields = 'population_size',
-		widgets = {'chemical'}
+		fields = 'population_size', 'gender', 'min_age', 'max_age'
+
+
+	population_size = forms.IntegerField(initial=5000)
+	gender = forms.CharField(
+		max_length=1,
+		widget=forms.Select(choices=GENDER_CHOICES),
+		initial='B',
+	)
+	min_age = forms.IntegerField(initial=0)
+	max_age = forms.IntegerField(initial=5)
