@@ -45,7 +45,6 @@ def hem_landing_page(request):
     response.write(html)
     return response
 
-
 def file_not_found(request):
     """ Returns the html of the landing page for qed. """
     html = render_to_string('01epa_drupal_header.html', {})
@@ -63,8 +62,7 @@ def file_not_found(request):
 
 def hem_results(request):
     """ Landing page for results of model run """
-    all_history = RunHistory.objects.all()
-    html = render_to_string('hem_results.html', {'all_history': all_history})
+    html = render_to_string('hem_results.html')
     response = HttpResponse()
     response.write(html)
     return response
@@ -94,7 +92,7 @@ def hem_index(request):
 
             else:
                 pop_qs = Person.objects.filter(gender=history.gender, age_years__gte=history.min_age,
-                                              age_years__lte=history.max_age).values('id', 'gender', 'race',
+                                               age_years__lte=history.max_age).values('id', 'gender', 'race',
                                                                                      'ethnicity', 'age_years', 'ages',
                                                                                      'genders', 'baths', 'lot',
                                                                                      'dishwash', 'cwasher', 'swim')
@@ -103,28 +101,8 @@ def hem_index(request):
             csvName = 'static_qed/hem/files/population_' + str(history.id) + '.csv'
             with open(csvName, 'wb') as csv_file:
                 write_csv(pop_qs, csv_file)
+                print(csv_file)
 
-            return HttpResponseRedirect('results')
+            return HttpResponseRedirect('results', {'runHistory': history})
+    
         return render(request, 'hem_index.html', {'form': form})
-
-
-def get_json_data(request):
-    #data1 = [data.gender and data.population_size  for data in RunHistory.objects.all()]
-    data = dict(history=list(RunHistory.objects.values('gender', 'population_size', 'min_age', 'max_age', 'categories_id')))
-    return JsonResponse(data, safe=True)
-
-
-def query_category(request):
-    parent_id = request.GET.get('care_id', None)
-    data = list(Category.objects.filter(parent_id=parent_id).values('id', 'title'))  #.values_list('id', 'title'))
-    return JsonResponse({'care_id': data }, content_type="application/json", safe=True)
-
-
-#class ChemicalAutocomplete(autocomplete.Select2QuerySetView):
-#	def get_queryset(self):
-#		data = Chemical.objects.exclude(dose=None)
-
-#		if self.q:
-#			data = data.filter(cas__istartswith=self.q)
-
-#		return data
