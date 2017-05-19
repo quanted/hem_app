@@ -1,29 +1,27 @@
 from django.template.loader import render_to_string
-from django.http import HttpResponse, HttpResponseRedirect, Http404, JsonResponse
-from django.shortcuts import render, render_to_response
-#import links_left
-import os, tempfile, zipfile, json
-#import secret
+from django.http import HttpResponse, HttpResponseRedirect
+from django.shortcuts import render
+
 from django.conf import settings
-from wsgiref.util import FileWrapper
-import mimetypes
-from .forms import HemForm, popgenForm
-from .models import Category, RunHistory
-from rest_framework.views import APIView
-from rest_framework.response import Response
+from .forms import RunForm
+from .models import Category, Chemical, Person, RunHistory
+from django.utils import timezone
+from djqscsv import render_to_csv_response
 
-
-def send_file(request):
-    """ returns a static file for testing """
-    filename = "../static_qed/hem/files/example.csv"  # Select your file here.
-    download_name = "example.csv"
-    wrapper = FileWrapper(open(filename))
-    content_type = mimetypes.guess_type(filename)[0]
-    response = HttpResponse(wrapper, content_type=content_type)
-    response['Content-Length'] = os.path.getsize(filename)
-    response['Content-Disposition'] = "attachment; filename={0!s}".format(download_name)
-    return response
-
+def get_population_qs(h):
+	history = RunHistory.objects.get(pk=h)
+	if history.gender == 'B':
+		population = Person.objects.filter(age_years__gte=history.min_age,
+		                                   age_years__lte=history.max_age).values('id', 'gender', 'race', 'ethnicity',
+                                                                                 'age_years', 'ages', 'genders',
+                                                                                 'baths', 'lot', 'dishwash', 'cwasher',
+                                                                                 'swim')
+	else:
+		population = Person.objects.filter(age_years__gte=history.min_age, age_years__lte=history.max_age,
+                                           gender=history.gender).values('id', 'gender', 'race', 'ethnicity',
+                                                                         'age_years', 'ages', 'genders',  'baths',
+                                                                         'lot', 'dishwash', 'cwasher', 'swim')
+	return population
 
 def hem_landing_page(request):
     """ Returns the html of the landing page for qed. """
@@ -42,7 +40,6 @@ def hem_landing_page(request):
     response.write(html)
     return response
 
-
 def file_not_found(request):
     """ Returns the html of the landing page for qed. """
     html = render_to_string('01epa_drupal_header.html', {})
@@ -58,80 +55,41 @@ def file_not_found(request):
     response.write(html)
     return response
 
-
-def hem_popgen(request):
-    """ Main landing and form for hem_app """
-    all_categories = Category.objects.filter(parent=None).values_list('id', 'title')
-    form = popgenForm(request.POST)
-    if request.method == 'POST':
-        if form.is_valid():
-            sub_category = request.POST.get('sub_category', -1)
-            category = Category.objects.get(id=sub_category) #form.cleaned_data['sub_category1'])
-            product= request.POST.get('toggleProducts', True)
-            population_size = form.cleaned_data.get('population_field')
-            gender = request.POST['optionsRadiosGender']
-            age_radio = request.POST['optionsRadiosAge']
-            min_age = 0
-            mix_age = 0
-            if age_radio == 'age1':
-                min_age = 0
-                mix_age = 5
-            elif age_radio == 'age2':
-                min_age = 6
-                mix_age = 12
-            elif age_radio == 'age3':
-                min_age = 13
-                mix_age = 15
-            elif age_radio == 'age4':
-                min_age = 16
-                mix_age = 18
-            elif age_radio == 'age5':
-                min_age = 19
-                mix_age = 49
-            elif age_radio == 'age6':
-                min_age = 49
-                mix_age = 99
-            history = RunHistory(categories=category, products=product, population_size=population_size,
-                                 gender=gender, min_age=min_age, max_age=mix_age)
-            history.save()
-            return HttpResponseRedirect('results',  { 'all_historyRows': all_categories })
-        else: raise Http404('Unable to save population generation data..')
-    else:
-        form = popgenForm()
-        return render(request, 'hem_popgen.html', {'form': form, 'all_categories': all_categories })
-
-
 def hem_results(request):
     """ Landing page for results of model run """
-    all_history = RunHistory.objects.all()
-    html = render_to_string('hem_results.html', {'all_history':all_history })
+    run_history_id = request.session.get('run_history_id')
+    file_name = 'population_' + str(run_history_id)
+    html = render_to_string('hem_results.html')
     response = HttpResponse()
     response.write(html)
-    return response
+    return render(request, 'hem_results.html', {'file_name': file_name, 'run_history_id': run_history_id})
+
+def hem_results_population_csv(request):
+	run_history_id = request.session.get('run_history_id')
+	qs = get_population_qs(run_history_id)
+	file_name = 'population_' + str(run_history_id)
+	return render_to_csv_response(qs, file_name)
 
 
-def get_json_data(request):
-    #data1 = [data.gender and data.population_size  for data in RunHistory.objects.all()]
-    data = dict(history=list(RunHistory.objects.values('gender', 'population_size', 'min_age', 'max_age', 'categories_id')))
-    return JsonResponse(data, safe=True)
+def hem_index(request):
+	form = RunForm()
+	if request.method =="POST":
+		form = RunForm(request.POST)
+        if form.is_valid():
+            chemical = Chemical.objects.get(pk=request.POST.get('selectChemical'))
+            categories = Category.objects.get(pk=request.POST.get('selectProduct'))
+            products = request.POST.get('inlineRadioOptions')
+            history = form.save(commit=False)
+            history.created_at = timezone.now()
+            history.updated_at = timezone.now()
+            history.chemical = chemical
+            history.categories = categories
+            history.products = products
+            history.save()
 
+            # send the runHistory id to the results page via a session
+            request.session['run_history_id'] = history.id
 
-def query_category(request):
-    parent_id = request.GET.get('care_id', None)
-    data = list(Category.objects.filter(parent_id=parent_id).values('id', 'title'))  #.values_list('id', 'title'))
-    return JsonResponse({'care_id': data }, content_type="application/json", safe=True)
-
-
-#class get_results(APIView):
-#    authentication_classes = ()
-#    permission_classes = ()
-
-#    def get(self, request, format=None):
-#        gender = [data.gender for data in RunHistory.objects.all()]
-#        population_size = [data.population_size for data in RunHistory.objects.all()]
-#        data = {
-#            'Gender': gender,
-#            'Popupation': population_size
-#        }
-#        return Response(data)
-
+            return HttpResponseRedirect('results', {'runHistory': history})
+    
+        return render(request, 'hem_index.html', {'form': form})

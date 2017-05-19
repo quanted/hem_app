@@ -1,28 +1,29 @@
 from django import forms
 
-from hem_app.models.runhistory import RunHistory, Category
-from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Fieldset, ButtonHolder, Submit
-from crispy_forms.bootstrap import TabHolder, Tab
+from hem_app.models import RunHistory, Category, Chemical, Dose
 
-# <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><
+GENDER_CHOICES = (
+	('B', 'Both'),
+	('F', 'Female'),
+	('M', 'Male')
+)
+
+PRODUCT_CHOICES = (
+	('1', 'Products'),
+	('0', 'Chemicals')
+)
+
+class RunForm(forms.ModelForm):
+	class Meta:
+		model = RunHistory
+		fields = 'population_size', 'gender', 'min_age', 'max_age'
 
 
-class popgenForm(forms.Form):
-    population_field = forms.IntegerField(min_value=0,
-                                          initial='1000000',
-                                          label='Population Size',
-                                          error_messages={'min_value': 'Negative number is not allowed'},
-                                          widget=forms.NumberInput(attrs={'onchange': "populationsync(value);"}))
-
-# <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><
-# Unable to user modelForm because we need to filter data and
-# we are using Radio buttons, we need to define min and max value
-
-class HemForm(forms.ModelForm):
-    """ Form for Model run """
-
-    class Meta:
-        model = RunHistory
-        fields = ('categories', 'products', 'population_size')
-
+	population_size = forms.IntegerField(initial=5000)
+	gender = forms.CharField(
+		max_length=1,
+		widget=forms.Select(choices=GENDER_CHOICES),
+		initial='B',
+	)
+	min_age = forms.IntegerField(initial=0)
+	max_age = forms.IntegerField(initial=5)
