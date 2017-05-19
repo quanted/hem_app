@@ -1,32 +1,27 @@
 from django.template.loader import render_to_string
-from django.http import HttpResponse, HttpResponseRedirect, Http404, JsonResponse
-from django.shortcuts import render, render_to_response, redirect
-import os
-import tempfile
-import zipfile
-import json
+from django.http import HttpResponse, HttpResponseRedirect
+from django.shortcuts import render
+
 from django.conf import settings
-from wsgiref.util import FileWrapper
-import mimetypes
 from .forms import RunForm
-from .models import Category, RunHistory, Dose, Chemical, Person
-# from rest_framework.views import APIView
-# from rest_framework.response import Response
-from dal import autocomplete
+from .models import Category, Chemical, Person, RunHistory
 from django.utils import timezone
-from djqscsv import write_csv, render_to_csv_response
+from djqscsv import render_to_csv_response
 
-def send_file(request):
-    """ returns a static file for testing """
-    filename = "../static_qed/hem/files/example.csv"  # Select your file here.
-    download_name = "example.csv"
-    wrapper = FileWrapper(open(filename))
-    content_type = mimetypes.guess_type(filename)[0]
-    response = HttpResponse(wrapper, content_type=content_type)
-    response['Content-Length'] = os.path.getsize(filename)
-    response['Content-Disposition'] = "attachment; filename={0!s}".format(download_name)
-    return response
-
+def get_population_qs(h):
+	history = RunHistory.objects.get(pk=h)
+	if history.gender == 'B':
+		population = Person.objects.filter(age_years__gte=history.min_age,
+		                                   age_years__lte=history.max_age).values('id', 'gender', 'race', 'ethnicity',
+                                                                                 'age_years', 'ages', 'genders',
+                                                                                 'baths', 'lot', 'dishwash', 'cwasher',
+                                                                                 'swim')
+	else:
+		population = Person.objects.filter(age_years__gte=history.min_age, age_years__lte=history.max_age,
+                                           gender=history.gender).values('id', 'gender', 'race', 'ethnicity',
+                                                                         'age_years', 'ages', 'genders',  'baths',
+                                                                         'lot', 'dishwash', 'cwasher', 'swim')
+	return population
 
 def hem_landing_page(request):
     """ Returns the html of the landing page for qed. """
@@ -62,10 +57,19 @@ def file_not_found(request):
 
 def hem_results(request):
     """ Landing page for results of model run """
+    run_history_id = request.session.get('run_history_id')
+    file_name = 'population_' + str(run_history_id)
     html = render_to_string('hem_results.html')
     response = HttpResponse()
     response.write(html)
-    return response
+    return render(request, 'hem_results.html', {'file_name': file_name, 'run_history_id': run_history_id})
+
+def hem_results_population_csv(request):
+	run_history_id = request.session.get('run_history_id')
+	qs = get_population_qs(run_history_id)
+	file_name = 'population_' + str(run_history_id)
+	return render_to_csv_response(qs, file_name)
+
 
 def hem_index(request):
 	form = RunForm()
@@ -82,26 +86,9 @@ def hem_index(request):
             history.categories = categories
             history.products = products
             history.save()
-            #create the queryset for population csv - should include gender and ages
-            if history.gender == 'B':
-                pop_qs = Person.objects.filter(age_years__gte=history.min_age,
-                                               age_years__lte=history.max_age).values('id', 'gender', 'race',
-                                                                                      'ethnicity', 'age_years', 'ages',
-                                                                                      'genders', 'baths', 'lot',
-                                                                                      'dishwash', 'cwasher', 'swim')
 
-            else:
-                pop_qs = Person.objects.filter(gender=history.gender, age_years__gte=history.min_age,
-                                               age_years__lte=history.max_age).values('id', 'gender', 'race',
-                                                                                     'ethnicity', 'age_years', 'ages',
-                                                                                     'genders', 'baths', 'lot',
-                                                                                     'dishwash', 'cwasher', 'swim')
-
-            # name the population csv
-            csvName = 'static_qed/hem/files/population_' + str(history.id) + '.csv'
-            with open(csvName, 'wb') as csv_file:
-                write_csv(pop_qs, csv_file)
-                print(csv_file)
+            # send the runHistory id to the results page via a session
+            request.session['run_history_id'] = history.id
 
             return HttpResponseRedirect('results', {'runHistory': history})
     
