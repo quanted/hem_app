@@ -4,9 +4,33 @@ from django.shortcuts import render
 
 from django.conf import settings
 from .forms import RunForm
-from .models import Category, Chemical, Person, RunHistory
+from .models import Category, Chemical, Person, RunHistory, Dose
 from django.utils import timezone
 from djqscsv import render_to_csv_response
+
+
+def get_dose_qs(h):
+	history = RunHistory.objects.get(pk=h)
+	# first filter by age and gender from the form
+	if history.gender == 'B':
+		dose = Dose.objects.filter(person__age_years__gte=history.min_age, person__age_years__lte=history.max_age)
+	else:
+		dose = Dose.objects.filter(person__age_years__gte=history.min_age, person__age_years__lte=history.max_age,
+		                           person__gender=history.gender)
+
+	# Process dose for chemical
+	if history.products == 0:
+		chem_id = Chemical.objects.get(pk=history.chemical_id)
+		dose = dose.filter(chemical_id=chem_id).values('person_id', 'day', 'intake_ingest_mgkgBW_d',
+		                                               'intake_derm_mgkgBW_d', 'intake_inhal_mgkgBW_d',
+		                                               'peak_hourly_air_conc_ug_m3', 'peak_dermal_loading_ug',
+		                                               'disposal_solid_waste_ug', 'disposal_window_ug',
+		                                               'disposal_sanitary_drain_ug', 'disposal_outdoor_surface_ug')
+	# TODO process dose for product
+	else:
+		dose = dose
+
+	return dose
 
 def get_population_qs(h):
 	history = RunHistory.objects.get(pk=h)
@@ -58,16 +82,24 @@ def file_not_found(request):
 def hem_results(request):
     """ Landing page for results of model run """
     run_history_id = request.session.get('run_history_id')
-    file_name = 'population_' + str(run_history_id)
+    pfile_name = 'population_' + str(run_history_id)
+    dfile_name = 'dose_' + str(run_history_id)
     html = render_to_string('hem_results.html')
     response = HttpResponse()
     response.write(html)
-    return render(request, 'hem_results.html', {'file_name': file_name, 'run_history_id': run_history_id})
+    return render(request, 'hem_results.html', {'pfile_name': pfile_name, 'dfile_name': dfile_name,
+                                                'run_history_id': run_history_id})
 
 def hem_results_population_csv(request):
 	run_history_id = request.session.get('run_history_id')
 	qs = get_population_qs(run_history_id)
 	file_name = 'population_' + str(run_history_id)
+	return render_to_csv_response(qs, file_name)
+
+def hem_results_dose_csv(request):
+	run_history_id = request.session.get('run_history_id')
+	qs = get_dose_qs(run_history_id)
+	file_name = 'dose_' + str('run_history_id')
 	return render_to_csv_response(qs, file_name)
 
 

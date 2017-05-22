@@ -1,8 +1,6 @@
 #  https://docs.djangoproject.com/en/1.6/intro/tutorial03/
 from django.conf import settings
-
 from django.conf.urls import url
-
 from . import views
 
 app_name = 'hem_app'
@@ -15,6 +13,7 @@ if settings.IS_PUBLIC:
         url(r'^index/?$', views.hem_index),
         url(r'^results/?$', views.hem_results),
         url(r'^resultspop/?$', views.hem_results_population_csv),
+        url(r'^resultsdose/?$', views.hem_results_dose_csv),
         # url(r'^admin/', include(admin.site.urls)),
     ]
 else:
@@ -26,6 +25,7 @@ else:
         url(r'^index/?$', views.hem_index),
         url(r'^results/?$', views.hem_results),
         url(r'^resultspop/?$', views.hem_results_population_csv),
+        url(r'^resultsdose/?$', views.hem_results_dose_csv),
         # url(r'^$', views.qed_splash_page_intrane
         #url(r'^$', views.qed_splash_page_intranet),
         # url(r'^admin/', include(admin.site.urls)),
