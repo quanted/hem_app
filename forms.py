@@ -20,6 +20,6 @@ class RunForm(forms.ModelForm):
 
 
 	population_size = forms.IntegerField(initial=5000, widget=forms.TextInput(attrs={'class': 'form-control'}))
-	gender = forms.CharField(max_length=1, widget=forms.Select(choices=GENDER_CHOICES, initial='B'))
+	gender = forms.CharField(max_length=1, widget=forms.Select(choices=GENDER_CHOICES))
 	min_age = forms.IntegerField(initial=0, widget=forms.TextInput(attrs={'class': 'form-control'}))
 	max_age = forms.IntegerField(initial=5, widget=forms.TextInput(attrs={'class': 'form-control'}))
