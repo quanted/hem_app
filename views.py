@@ -21,11 +21,7 @@ def get_dose_qs(h):
 	# Process dose for chemical
 	if history.products == 0:
 		chem_id = Chemical.objects.get(pk=history.chemical_id)
-		dose = dose.filter(chemical_id=chem_id).values('person_id', 'day', 'intake_ingest_mgkgBW_d',
-		                                               'intake_derm_mgkgBW_d', 'intake_inhal_mgkgBW_d',
-		                                               'peak_hourly_air_conc_ug_m3', 'peak_dermal_loading_ug',
-		                                               'disposal_solid_waste_ug', 'disposal_window_ug',
-		                                               'disposal_sanitary_drain_ug', 'disposal_outdoor_surface_ug')
+		dose = dose.filter(chemical_id=chem_id)
 	# TODO process dose for product
 	else:
 		dose = dose
