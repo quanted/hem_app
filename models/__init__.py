@@ -11,3 +11,4 @@ from .habit import Habit
 from .neverever import Neverever
 from .composition import Composition
 from .behavior import Behavior
+from .lifecycleimpact import LifeCycleImpact
