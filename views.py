@@ -99,7 +99,7 @@ def hem_results_population_csv(request):
 def hem_results_dose_csv(request):
 	run_history_id = request.session.get('run_history_id')
 	qs = get_dose_qs(run_history_id)
-	file_name = 'dose_' + str('run_history_id')
+	file_name = 'dose_' + str(run_history_id)
 	return render_to_csv_response(qs, file_name)
 
 
