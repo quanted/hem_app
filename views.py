@@ -104,13 +104,11 @@ def hem_index(request):
 	if request.method =="POST":
 		form = RunForm(request.POST)
         if form.is_valid():
-            chemical = Chemical.objects.get(pk=request.POST.get('selectChemical'))
             categories = Category.objects.get(pk=request.POST.get('selectProduct'))
             products = request.POST.get('inlineRadioOptions')
             history = form.save(commit=False)
             history.created_at = timezone.now()
             history.updated_at = timezone.now()
-            history.chemical = chemical
             history.categories = categories
             history.products = products
             history.save()
