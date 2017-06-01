@@ -12,6 +12,7 @@ class RunParams(models.Model):
     race = models.CharField(max_length=20, default="WBNAPO")
     category = models.ForeignKey('Category', on_delete=models.CASCADE)
     product = models.ForeignKey('Product', on_delete=models.CASCADE, blank=True, null=True)
+    notes = models.TextField(default=None)
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
     updated_at = models.DateTimeField(auto_now=True, editable=False)
 
