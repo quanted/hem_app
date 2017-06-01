@@ -24,7 +24,7 @@ class Chemical(models.Model):
     updated_at = models.DateTimeField(auto_now=True, editable=False)
 
     def __str__(self):
-        return self.cas
+        return self.cas + ' :: ' + self.title
 
     class Meta:
         ordering = ('cas', 'title',)
