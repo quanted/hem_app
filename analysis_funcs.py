@@ -6,6 +6,8 @@ def get_chemical_data(chemical):
 	data = pd.DataFrame(list(Dose.objects.filter(chemical_id=chemical).values('id', 'day', 'dir_derm_abs',
 																			  'dir_ingest_abs', 'dir_inhal_abs')))
 
+	population_null = 80
+
 	# Magic from Katherine Phillips
 	data = data[['id', 'day', 'dir_derm_abs', 'dir_ingest_abs', 'dir_inhal_abs']].copy()
 	data['day_sys_dose'] = data.dir_derm_abs + data.dir_ingest_abs + data.dir_inhal_abs
