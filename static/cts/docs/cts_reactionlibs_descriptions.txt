@@ -1,0 +1,18 @@
+<h3>Abiotic Hydrolysis Reaction Library</h3>
+<p>Version 1.7 of the Abiotic Hydrolysis Reaction Library contains 25 reaction schemes.  Left click a reaction scheme to view the generalized reaction scheme, supporting reaction rules for reactivity, selectivity and exclusion, as well as example transformation pathways based on the execution of the reaction scheme.  References to process science on which the reaction scheme was developed are also provided.</p>
+
+<h4> Click <a href="/static_qed/cts/docs/HydrolysisRxnLib_ver1-7.pdf" download="HydrolysisRxnLib_ver1-7.pdf">here</a> to download hydrolysis reaction library.</h4>
+<!--<embed src="/static_qed/cts/docs/HydrolysisRxnLib_ver1-7.pdf" class="libPDF">-->
+
+<br><br>
+
+<h3>Abiotic Reduction Reaction Library</h3>
+<p>Version 1.4 of the Abiotic Reduction Reaction Library contains 8 reaction schemes.  Left click a reaction scheme to view the generalized reaction scheme, supporting reaction rules for reactivity, selectivity and exclusion, as well as example transformation pathways based on the execution of the reaction scheme.  References to process science on which the reaction scheme was developed are also provided.</p>
+
+<h4> Click <a href="/static_qed/cts/docs/AbioticReductionRxnLib_vers1-4.pdf" download="AbioticReductionRxnLib_vers1-4.pdf">here</a> to download abiotic reduction library.</h4>
+<!--<embed src="/static_qed/cts/docs/AbioticReductionRxnLib_vers1-4.pdf" class="libPDF">-->
+
+<br><br>
+
+<h3>Mammalian Metabolism Reaction Library</h3>
+<p>The Mammalian Metabolism Reaction Library contains 156 reaction schemes based on CYP450 Phase 1 biotransformations. This reaction library was developed by Chemaxon. The reaction library is proprietary, and thus, details of the reactions schemes cannot be viewed.</p>
