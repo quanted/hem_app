@@ -1,5 +1,59 @@
-from hem_app.models import Dose, Category, RunParams
+from hem_app.models import Dose, Category, RunParams, LifeCycleImpact, RunHistory
 import pandas as pd
+
+
+def get_lcia_qs(h):
+	history = RunHistory.objects.get(pk=h)
+	# find the run params id for the category in runhistory
+	rp = RunParams.objects.filter(category=history.categories).first()
+	# all rows in lifecycle that have the run params id
+	lcia = LifeCycleImpact.objects.filter(runparams_id=rp.id).values('chemical__cas', 'chemical__title', 'runparams_id',
+																	 'mass_frac_chem_puc', 'mass_puc_use_adult',
+																	 'pif_derm_adult', 'pif_inhal_adult',
+																	 'pif_inhal_adult', 'mass_puc_use_child',
+																	 'pif_derm_child', 'pif_inhal_child',
+																	 'pif_ingest_child', 'chem_mass',
+																	 'mass_tot_air', 'mass_tot_water',
+																	 'mass_tot_land', 'product__category__title',
+																	 'product__title')
+
+	return lcia
+
+
+def get_dose_qs(h):
+	history = RunHistory.objects.get(pk=h)
+	# first filter by age and gender from the form
+	if history.gender == 'B':
+		dose = Dose.objects.filter(person__age_years__gte=history.min_age, person__age_years__lte=history.max_age)
+	else:
+		dose = Dose.objects.filter(person__age_years__gte=history.min_age, person__age_years__lte=history.max_age,
+								   person__gender=history.gender)
+
+	# Process dose for chemical
+	if history.products == 0:
+		chem_id = Chemical.objects.get(pk=history.chemical_id)
+		dose = dose.filter(chemical_id=chem_id)
+	# TODO process dose for product
+	else:
+		dose = dose
+
+	return dose
+
+
+def get_population_qs(h):
+	history = RunHistory.objects.get(pk=h)
+	if history.gender == 'B':
+		population = Person.objects.filter(age_years__gte=history.min_age,
+										   age_years__lte=history.max_age).values('id', 'gender', 'race', 'ethnicity',
+																				 'age_years', 'ages', 'genders',
+																				 'baths', 'lot', 'dishwash', 'cwasher',
+																				 'swim')
+	else:
+		population = Person.objects.filter(age_years__gte=history.min_age, age_years__lte=history.max_age,
+										   gender=history.gender).values('id', 'gender', 'race', 'ethnicity',
+																		 'age_years', 'ages', 'genders',  'baths',
+																		 'lot', 'dishwash', 'cwasher', 'swim')
+	return population
 
 
 def get_chemical_data(chemical):

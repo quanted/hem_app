@@ -7,43 +7,8 @@ from .forms import RunForm
 from .models import Category, Chemical, Person, RunHistory, Dose
 from django.utils import timezone
 from djqscsv import render_to_csv_response
-from .analysis_funcs import get_chemical_data
-import pandas as pd
+from .analysis_funcs import get_chemical_data, get_dose_qs, get_population_qs, get_lcia_qs
 
-
-def get_dose_qs(h):
-	history = RunHistory.objects.get(pk=h)
-	# first filter by age and gender from the form
-	if history.gender == 'B':
-		dose = Dose.objects.filter(person__age_years__gte=history.min_age, person__age_years__lte=history.max_age)
-	else:
-		dose = Dose.objects.filter(person__age_years__gte=history.min_age, person__age_years__lte=history.max_age,
-								   person__gender=history.gender)
-
-	# Process dose for chemical
-	if history.products == 0:
-		chem_id = Chemical.objects.get(pk=history.chemical_id)
-		dose = dose.filter(chemical_id=chem_id)
-	# TODO process dose for product
-	else:
-		dose = dose
-
-	return dose
-
-def get_population_qs(h):
-	history = RunHistory.objects.get(pk=h)
-	if history.gender == 'B':
-		population = Person.objects.filter(age_years__gte=history.min_age,
-										   age_years__lte=history.max_age).values('id', 'gender', 'race', 'ethnicity',
-																				 'age_years', 'ages', 'genders',
-																				 'baths', 'lot', 'dishwash', 'cwasher',
-																				 'swim')
-	else:
-		population = Person.objects.filter(age_years__gte=history.min_age, age_years__lte=history.max_age,
-										   gender=history.gender).values('id', 'gender', 'race', 'ethnicity',
-																		 'age_years', 'ages', 'genders',  'baths',
-																		 'lot', 'dishwash', 'cwasher', 'swim')
-	return population
 
 def hem_landing_page(request):
 	""" Returns the html of the landing page for qed. """
@@ -108,6 +73,12 @@ def hem_results_dose_csv(request):
 	run_history_id = request.session.get('run_history_id')
 	qs = get_dose_qs(run_history_id)
 	file_name = 'dose_' + str(run_history_id)
+	return render_to_csv_response(qs, file_name)
+
+def hem_results_lcia_csv(request):
+	run_history_id = request.session.get('run_history_id')
+	qs = get_lcia_qs(run_history_id)
+	file_name = 'lcia_' + str(run_history_id)
 	return render_to_csv_response(qs, file_name)
 
 
