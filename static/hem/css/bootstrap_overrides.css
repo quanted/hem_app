@@ -18,7 +18,7 @@ body > .container {
     padding-top: 5px !important;
     padding-bottom: 5px !important;
     height: 30px;
-    color: white;
+    color: white !important;
 }
 
 .nav.navbar-nav li a {

@@ -80,10 +80,12 @@ def file_not_found(request):
 def hem_results(request):
 	""" Landing page for results of model run """
 	run_history_id = request.session.get('run_history_id')
+	rh = RunHistory.objects.get(pk=int(run_history_id))
+
 	pfile_name = 'population_' + str(run_history_id)
 	dfile_name = 'dose_' + str(run_history_id)
 	#TODO Logic for products and chemicals -> only chemical now
-	chemical = RunHistory.objects.get(pk=int(run_history_id)).chemical_id
+	chemical = rh.chemical_id
 	plot_data = get_chemical_data(chemical)
 	c = Chemical.objects.get(pk=chemical)
 	chem = {'name': c.title, 'cas': c.cas}
@@ -92,7 +94,7 @@ def hem_results(request):
 	response.write(html)
 	return render(request, 'hem_results.html', {'pfile_name': pfile_name, 'dfile_name': dfile_name,
 												'run_history_id': run_history_id, 'plot_data': plot_data,
-												'chem': chem})
+												'chem': chem, 'rh': rh})
 
 def hem_results_population_csv(request):
 	run_history_id = request.session.get('run_history_id')
