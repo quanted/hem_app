@@ -89,12 +89,14 @@ def hem_results(request):
 	plot_data = get_chemical_data(chemical)
 	c = Chemical.objects.get(pk=chemical)
 	chem = {'name': c.title, 'cas': c.cas}
+	category = Category.objects.get(pk=rh.categories_id)
+
 	html = render_to_string('hem_results.html')
 	response = HttpResponse()
 	response.write(html)
 	return render(request, 'hem_results.html', {'pfile_name': pfile_name, 'dfile_name': dfile_name,
 												'run_history_id': run_history_id, 'plot_data': plot_data,
-												'chem': chem, 'rh': rh})
+												'chem': chem, 'rh': rh, 'category': category})
 
 def hem_results_population_csv(request):
 	run_history_id = request.session.get('run_history_id')
@@ -114,12 +116,10 @@ def hem_index(request):
 	if request.method =="POST":
 		form = RunForm(request.POST)
 		if form.is_valid():
-			categories = Category.objects.get(pk=request.POST.get('selectProduct'))
 			products = request.POST.get('inlineRadioOptions')
 			history = form.save(commit=False)
 			history.created_at = timezone.now()
 			history.updated_at = timezone.now()
-			history.categories = categories
 			history.products = products
 			history.save()
 

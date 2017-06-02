@@ -1,10 +1,21 @@
-from hem_app.models import Chemical, Dose
+from hem_app.models import Dose, Category, RunParams
 import pandas as pd
 
 
 def get_chemical_data(chemical):
-	data = pd.DataFrame(list(Dose.objects.filter(chemical_id=chemical).values('id', 'day', 'dir_derm_abs',
-																			  'dir_ingest_abs', 'dir_inhal_abs')))
+
+	#TODO Apply form variables
+	#TODO Count People - This might go in the view prior to entry here
+
+	# only grab the dose for All products run params
+	all_cat_id = int(Category.objects.filter(parent_id=None).first().id)
+	run_params_id = int(RunParams.objects.filter(category_id=all_cat_id).first().id)
+
+	dose = Dose.objects.filter(chemical_id=chemical, runparams_id=run_params_id).values('id', 'day', 'dir_derm_abs',
+																						'dir_ingest_abs',
+																						'dir_inhal_abs')
+
+	data = pd.DataFrame(list(dose))
 
 	population_null = 80
 
