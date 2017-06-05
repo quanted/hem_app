@@ -2,6 +2,18 @@ from hem_app.models import Dose, Category, RunParams, LifeCycleImpact, RunHistor
 import pandas as pd
 
 
+def get_person_nulls(run_history):
+	'''
+	Given a run history return total_people, total_nulls, total_dosed
+	Args:
+		run_history = the run history from the form
+
+	Returns:
+		total {people, nulls,
+	'''
+
+
+
 def get_lcia_qs(h):
 	history = RunHistory.objects.get(pk=h)
 	# find the run params id for the category in runhistory
@@ -71,11 +83,26 @@ def get_chemical_data(chemical):
 
 	data = pd.DataFrame(list(dose))
 
-	population_null = 80
+	population_null = 8000
 
 	# Magic from Katherine Phillips
 	data = data[['id', 'day', 'dir_derm_abs', 'dir_ingest_abs', 'dir_inhal_abs']].copy()
+
+
+	n_days = 364
+	#TODO this next line should be the next id available to the dataframe
+	n_people = 109999999
+	data_null = pd.DataFrame({'id': pd.np.repeat(pd.np.arange(0, population_null) + n_people, n_days),
+							  "day": pd.np.tile(pd.np.arange(1, n_days + 1), population_null),
+							  "dir_derm_abs": pd.np.zeros(shape=(population_null * n_days)),
+							  "dir_ingest_abs": pd.np.zeros(shape=(population_null * n_days)),
+							  "dir_inhal_abs": pd.np.zeros(shape=(population_null * n_days))})
+	data_null = data_null[['id', 'day', 'dir_derm_abs', 'dir_ingest_abs', 'dir_inhal_abs']].copy()
+
+	## Combine data and data_null into one DataFrame
+	data = pd.concat([data, data_null])
 	data['day_sys_dose'] = data.dir_derm_abs + data.dir_ingest_abs + data.dir_inhal_abs
+
 	ann_sys_dose = data.groupby(['id']).day_sys_dose.mean().reset_index()
 	weights = pd.np.ones_like(ann_sys_dose.day_sys_dose.tolist()) / len(ann_sys_dose.day_sys_dose.tolist())
 	hist, bin_edges = pd.np.histogram(ann_sys_dose.day_sys_dose, weights=weights * 100, bins=20)
