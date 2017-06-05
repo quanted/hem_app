@@ -53,7 +53,7 @@ def hem_results(request):
 	chemical = rh.chemical_id
 	plot_data = get_chemical_data(chemical)
 	c = Chemical.objects.get(pk=chemical)
-	chem = {'name': c.title, 'cas': c.cas}
+	chem = {'name': c.title, 'cas': c.cas, 'dtxsid': c.dtxsid}
 	category = Category.objects.get(pk=rh.categories_id)
 
 	html = render_to_string('hem_results.html')
