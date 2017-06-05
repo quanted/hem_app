@@ -1,4 +1,4 @@
-from hem_app.models import Dose, Category, RunParams, LifeCycleImpact, RunHistory
+from hem_app.models import Dose, Category, RunParams, LifeCycleImpact, RunHistory, Chemical, Person
 import pandas as pd
 
 
