@@ -1,6 +1,6 @@
 from django import forms
 
-from hem_app.models import RunHistory, Category, Chemical, Dose, RunParams
+from hem_app.models import RunHistory, Chemical, Dose, RunParams, Product
 
 GENDER_CHOICES = (
 	('B', 'Both'),
@@ -17,12 +17,14 @@ class RunForm(forms.ModelForm):
 
 	chemical = forms.ModelChoiceField(queryset=Chemical.objects.filter(id__in=Dose.objects.values('chemical_id')),
 									  empty_label=None, to_field_name='cas')
-	categories = forms.ModelChoiceField(queryset=Category.objects.filter(id__in=RunParams.objects.values('category_id')),
-									  empty_label=None)
+
+	product = forms.ModelChoiceField(queryset=Product.objects.filter(id__in=RunParams.objects.values('product_id')),
+									 empty_label=None)
+
 	gender = forms.CharField(max_length=1, widget=forms.Select(choices=GENDER_CHOICES))
 	min_age = forms.IntegerField(initial=0, widget=forms.TextInput(attrs={'class': 'form-control'}))
 	max_age = forms.IntegerField(initial=99, widget=forms.TextInput(attrs={'class': 'form-control'}))
 
 	class Meta:
 		model = RunHistory
-		fields = 'chemical', 'categories', 'gender', 'min_age', 'max_age'
+		fields = 'chemical', 'product', 'gender', 'min_age', 'max_age'

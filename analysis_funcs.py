@@ -51,11 +51,11 @@ def get_dose_qs(h):
 					   'drain', 'waste')
 
 	# Process dose for chemical
-	if history.products == 0:
+	if history.is_product == 0:
 		chem_id = Chemical.objects.get(pk=history.chemical_id)
 		dose = dose.filter(chemical_id=chem_id)
-	# TODO process dose for product
 	else:
+		# TODO process dose for product
 		dose = dose
 
 	return dose
@@ -92,7 +92,7 @@ def get_chemical_data(chemical):
 
 	data = pd.DataFrame(list(dose))
 
-	population_null = 8000
+	population_null = 80
 
 	# Magic from Katherine Phillips
 	data = data[['id', 'day', 'dir_derm_abs', 'dir_ingest_abs', 'dir_inhal_abs']].copy()

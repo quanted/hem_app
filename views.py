@@ -4,7 +4,7 @@ from django.shortcuts import render
 
 from django.conf import settings
 from .forms import RunForm
-from .models import Category, Chemical, Person, RunHistory, Dose
+from .models import Product, Chemical, RunHistory
 from django.utils import timezone
 from djqscsv import render_to_csv_response
 from .analysis_funcs import get_chemical_data, get_dose_qs, get_population_qs, get_lcia_qs
@@ -54,14 +54,14 @@ def hem_results(request):
 	plot_data = get_chemical_data(chemical)
 	c = Chemical.objects.get(pk=chemical)
 	chem = {'name': c.title, 'cas': c.cas, 'dtxsid': c.dtxsid}
-	category = Category.objects.get(pk=rh.categories_id)
+	products = Product.objects.get(pk=rh.product_id)
 
 	html = render_to_string('hem_results.html')
 	response = HttpResponse()
 	response.write(html)
 	return render(request, 'hem_results.html', {'pfile_name': pfile_name, 'dfile_name': dfile_name,
 												'run_history_id': run_history_id, 'plot_data': plot_data,
-												'chem': chem, 'rh': rh, 'category': category})
+												'chem': chem, 'rh': rh, 'products': products})
 
 def hem_results_population_csv(request):
 	run_history_id = request.session.get('run_history_id')
