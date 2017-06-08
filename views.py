@@ -49,19 +49,30 @@ def hem_results(request):
 
 	pfile_name = 'population_' + str(run_history_id)
 	dfile_name = 'dose_' + str(run_history_id)
+	colors = ['rgba(119, 152, 191, .5)', 'rgba(141, 211, 199, .5)', 'rgba(150, 255, 179, .7)',
+			  'rgba(190, 186, 218, .5)', 'rgba(251, 128, 114, .5)', 'rgba(128, 177, 211, .5)',
+			  'rgba(253, 180, 98, .5)', 'rgba(179, 222, 105, .5)', 'rgba(252, 205, 229, .5)',
+			  'rgba(217, 217, 217, .5)', 'rgba(188, 128, 189, .5)', 'rgba(204, 235, 197, .5)',
+			  'rgba(255, 237, 111, .5)']
+
 	#TODO Logic for products and chemicals -> only chemical now
-	chemical = rh.chemical_id
-	plot_data = get_chemical_data(chemical)
-	c = Chemical.objects.get(pk=chemical)
-	chem = {'name': c.title, 'cas': c.cas, 'dtxsid': c.dtxsid}
+	if rh.is_product == 0:
+		chemical = rh.chemical_id
+		plot_data = get_chemical_data(chemical)
+		c = Chemical.objects.get(pk=chemical)
+		chem = [{'name': c.title, 'cas': c.cas, 'dtxsid': c.dtxsid, 'plot_data': plot_data,
+				 'plot_color': colors[0]}]
+	else:
+		print("put multichems here")
+
 	products = Product.objects.get(pk=rh.product_id)
 
 	html = render_to_string('hem_results.html')
 	response = HttpResponse()
 	response.write(html)
 	return render(request, 'hem_results.html', {'pfile_name': pfile_name, 'dfile_name': dfile_name,
-												'run_history_id': run_history_id, 'plot_data': plot_data,
-												'chem': chem, 'rh': rh, 'products': products})
+												'run_history_id': run_history_id, 'chem': chem, 'rh': rh,
+												'products': products})
 
 def hem_results_population_csv(request):
 	run_history_id = request.session.get('run_history_id')

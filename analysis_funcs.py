@@ -2,17 +2,6 @@ from hem_app.models import Dose, Category, RunParams, LifeCycleImpact, RunHistor
 import pandas as pd
 
 
-def get_person_nulls(run_history):
-	'''
-	Given a run history return total_people, total_nulls, total_dosed
-	Args:
-		run_history = the run history from the form
-
-	Returns:
-		total {people, nulls,
-	'''
-
-
 def get_lcia_qs(h):
 	history = RunHistory.objects.get(pk=h)
 	# find the run params id for the category in runhistory
