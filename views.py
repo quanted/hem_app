@@ -91,7 +91,7 @@ def hem_index(request):
 			history = form.save(commit=False)
 			history.created_at = timezone.now()
 			history.updated_at = timezone.now()
-			history.products = products
+			history.is_product = products
 			history.save()
 
 			# send the runHistory id to the results page via a session
