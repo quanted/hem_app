@@ -66,29 +66,35 @@ def get_population_qs(h):
 	return population
 
 
-def get_chemical_data(chemical):
+def get_chemical_data(chemical, run_history):
+	# get a count of the null population
+	if run_history.is_product == 0:
+		# only grab the dose for All products run params
+		all_cat_id = int(Category.objects.filter(parent_id=None).first().id)
+		run_params_id = int(RunParams.objects.filter(category_id=all_cat_id).first().id)
+		population_with_dose = Person.objects.filter(dose__runparams_id=run_params_id,
+													 dose__chemical=chemical).distinct().count()
+		population_null = Person.objects.filter(dataset_id=1).count() - population_with_dose
 
-	# TODO Apply form variables
-	# TODO Count People - This might go in the view prior to entry here
+		print("pop with dose is %i" % population_with_dose)
+		print("pop null is %i" % population_null)
+	else:
+		# TODO logic for products
+		x = "code will go here"
 
-	# only grab the dose for All products run params
-	all_cat_id = int(Category.objects.filter(parent_id=None).first().id)
-	run_params_id = int(RunParams.objects.filter(category_id=all_cat_id).first().id)
 
-	dose = Dose.objects.filter(chemical_id=chemical, runparams_id=run_params_id).values('id', 'day', 'dir_derm_abs',
-																						'dir_ingest_abs',
-																						'dir_inhal_abs')
-
+	dose = Dose.objects.filter(chemical_id=chemical,
+							   runparams_id=run_params_id).values('id', 'day', 'dir_derm_abs', 'dir_ingest_abs',
+																  'dir_inhal_abs')
 	data = pd.DataFrame(list(dose))
-
-	population_null = 80
 
 	# Magic from Katherine Phillips
 	data = data[['id', 'day', 'dir_derm_abs', 'dir_ingest_abs', 'dir_inhal_abs']].copy()
-
 	n_days = 364
-	# TODO this next line should be the next id available to the dataframe
-	n_people = 109999999
+	# get the next person id available to the dataframe
+	person_next_id = Person.objects.all().order_by("-id")[0].id + 1
+	print('next person id = %i' % person_next_id)
+	n_people = person_next_id
 	data_null = pd.DataFrame({'id': pd.np.repeat(pd.np.arange(0, population_null) + n_people, n_days),
 							  "day": pd.np.tile(pd.np.arange(1, n_days + 1), population_null),
 							  "dir_derm_abs": pd.np.zeros(shape=(population_null * n_days)),

@@ -58,7 +58,7 @@ def hem_results(request):
 	#TODO Logic for products and chemicals -> only chemical now
 	if rh.is_product == 0:
 		chemical = rh.chemical_id
-		plot_data = get_chemical_data(chemical)
+		plot_data = get_chemical_data(chemical, rh)
 		c = Chemical.objects.get(pk=chemical)
 		chem = [{'name': c.title, 'cas': c.cas, 'dtxsid': c.dtxsid, 'plot_data': plot_data,
 				 'plot_color': colors[0]}]
