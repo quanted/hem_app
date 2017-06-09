@@ -85,11 +85,14 @@ def get_chemical_data(chemical, run_history):
 
 	dose = Dose.objects.filter(chemical_id=chemical,
 							   runparams_id=run_params_id).values('id', 'day', 'dir_derm_abs', 'dir_ingest_abs',
-																  'dir_inhal_abs')
+																  'dir_inhal_abs', 'ind_derm_abs', 'ind_inhal_abs',
+																  'ind_ingest_abs')
 	data = pd.DataFrame(list(dose))
 
 	# Magic from Katherine Phillips
-	data = data[['id', 'day', 'dir_derm_abs', 'dir_ingest_abs', 'dir_inhal_abs']].copy()
+	data = data[['id', 'day', 'dir_derm_abs', 'dir_ingest_abs', 'dir_inhal_abs', 'ind_derm_abs', 'ind_inhal_abs',
+				 'ind_ingest_abs']].copy()
+	# the year in the model is only 364 days. WTF? This is how science works.
 	n_days = 364
 	# get the next person id available to the dataframe
 	person_next_id = Person.objects.all().order_by("-id")[0].id + 1
@@ -99,16 +102,20 @@ def get_chemical_data(chemical, run_history):
 							  "day": pd.np.tile(pd.np.arange(1, n_days + 1), population_null),
 							  "dir_derm_abs": pd.np.zeros(shape=(population_null * n_days)),
 							  "dir_ingest_abs": pd.np.zeros(shape=(population_null * n_days)),
-							  "dir_inhal_abs": pd.np.zeros(shape=(population_null * n_days))})
-	data_null = data_null[['id', 'day', 'dir_derm_abs', 'dir_ingest_abs', 'dir_inhal_abs']].copy()
+							  "dir_inhal_abs": pd.np.zeros(shape=(population_null * n_days)),
+							  "ind_derm_abs": pd.np.zeros(shape=(population_null * n_days)),
+							  "ind_inhal_abs": pd.np.zeros(shape=(population_null * n_days)),
+							  "ind_ingest_abs": pd.np.zeros(shape=(population_null * n_days))})
+	data_null = data_null[['id', 'day', 'dir_derm_abs', 'dir_ingest_abs', 'dir_inhal_abs', 'ind_derm_abs',
+						   'ind_inhal_abs', 'ind_ingest_abs']].copy()
 
 	# Combine data and data_null into one DataFrame
 	data = pd.concat([data, data_null])
-	data['day_sys_dose'] = data.dir_derm_abs + data.dir_ingest_abs + data.dir_inhal_abs
+	data['day_sys_dose'] = data.dir_derm_abs + data.dir_ingest_abs + data.dir_inhal_abs + data.ind_derm_abs + data.ind_inhal_abs + data.ind_ingest_abs
 
 	ann_sys_dose = data.groupby(['id']).day_sys_dose.mean().reset_index()
 	weights = pd.np.ones_like(ann_sys_dose.day_sys_dose.tolist()) / len(ann_sys_dose.day_sys_dose.tolist())
-	hist, bin_edges = pd.np.histogram(ann_sys_dose.day_sys_dose, weights=weights * 100, bins=20)
+	hist, bin_edges = pd.np.histogram(ann_sys_dose.day_sys_dose, weights=weights * 100, bins=30)
 	bin_centers = (bin_edges[:-1] + bin_edges[1:]) / 2.
 	cum_dist = pd.np.cumsum(hist)
 
