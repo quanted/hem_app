@@ -75,9 +75,6 @@ def get_chemical_data(chemical, run_history):
 		population_with_dose = Person.objects.filter(dose__runparams_id=run_params_id,
 													 dose__chemical=chemical).distinct().count()
 		population_null = Person.objects.filter(dataset_id=1).count() - population_with_dose
-
-		print("pop with dose is %i" % population_with_dose)
-		print("pop null is %i" % population_null)
 	else:
 		# TODO logic for products
 		x = "code will go here"
@@ -96,7 +93,6 @@ def get_chemical_data(chemical, run_history):
 	n_days = 364
 	# get the next person id available to the dataframe
 	person_next_id = Person.objects.all().order_by("-id")[0].id + 1
-	print('next person id = %i' % person_next_id)
 	n_people = person_next_id
 	data_null = pd.DataFrame({'id': pd.np.repeat(pd.np.arange(0, population_null) + n_people, n_days),
 							  "day": pd.np.tile(pd.np.arange(1, n_days + 1), population_null),

@@ -1,7 +1,6 @@
 from django.template.loader import render_to_string
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
-
 from django.conf import settings
 from .forms import RunForm
 from .models import Product, Chemical, RunHistory
@@ -66,13 +65,14 @@ def hem_results(request):
 		print("put multichems here")
 
 	products = Product.objects.get(pk=rh.product_id)
+	population = get_population_qs(rh.id).count()
 
 	html = render_to_string('hem_results.html')
 	response = HttpResponse()
 	response.write(html)
 	return render(request, 'hem_results.html', {'pfile_name': pfile_name, 'dfile_name': dfile_name,
 												'run_history_id': run_history_id, 'chem': chem, 'rh': rh,
-												'products': products})
+												'products': products, 'population': population})
 
 def hem_results_population_csv(request):
 	run_history_id = request.session.get('run_history_id')
