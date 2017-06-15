@@ -22,8 +22,6 @@ def get_lcia_qs(h):
 
 def get_dose_qs(h):
 	history = RunHistory.objects.get(pk=h)
-	# find the run params id for the category with all products
-	rp = RunParams.objects.filter(category__category__runparams=None).first()
 
 	# first filter by age and gender from the form
 	if history.gender == 'B':
@@ -32,7 +30,7 @@ def get_dose_qs(h):
 		dose = Dose.objects.filter(person__age_years__gte=history.min_age, person__age_years__lte=history.max_age,
 								   person__gender=history.gender)
 
-	dose = dose.filter(runparams_id=rp.id).values('runparams', 'chemical__cas', 'chemical__title', 'person_id', 'person__gender',
+	dose = dose.values('runparams', 'chemical__cas', 'chemical__title', 'person_id', 'person__gender',
 					   'person__age_years', 'day', 'dir_derm_exp', 'dir_derm_max', 'dir_derm_abs', 'dir_inhal_exp',
 					   'dir_inhal_mass', 'dir_inhal_max', 'dir_inhal_abs', 'dir_ingest_exp', 'dir_ingest_abs',
 					   'release', 'ind_derm_exp', 'ind_derm_max', 'ind_derm_abs', 'ind_inhal_exp', 'ind_inhal_max',
@@ -41,11 +39,15 @@ def get_dose_qs(h):
 
 	# Process dose for chemical
 	if history.is_product == 0:
+		# find the run params id for the category with all products
+		rp = RunParams.objects.filter(category__category__runparams=None).first().id
 		chem_id = Chemical.objects.get(pk=history.chemical_id)
-		dose = dose.filter(chemical_id=chem_id)
+		dose = dose.filter(chemical_id=chem_id, runparams_id=rp)
+		print(dose.count())
 	else:
-		# TODO process dose for product
-		dose = dose
+		rp = RunParams.objects.filter(product_id=history.product_id).first().id
+		dose = dose.filter(runparams_id=rp)
+		print(dose.count())
 
 	return dose
 
@@ -67,7 +69,6 @@ def get_population_qs(h):
 
 
 def get_chemical_data(chemical, run_history):
-	# get a count of the null population
 	if run_history.is_product == 0:
 		# only grab the dose for All products run params
 		all_cat_id = int(Category.objects.filter(parent_id=None).first().id)
@@ -75,28 +76,21 @@ def get_chemical_data(chemical, run_history):
 		population_with_dose = Person.objects.filter(dose__runparams_id=run_params_id,
 													 dose__chemical=chemical).distinct().count()
 		population_null = Person.objects.filter(dataset_id=1).count() - population_with_dose
-
-		print("pop with dose is %i" % population_with_dose)
-		print("pop null is %i" % population_null)
 	else:
-		# TODO logic for products
-		x = "code will go here"
+		run_params_id = int(RunParams.objects.filter(product_id=run_history.product_id).first().id)
+		population_with_dose = Person.objects.filter(dose__runparams_id=run_params_id,
+													 dose__chemical=chemical).distinct().count()
+		population_null = Person.objects.filter(dataset_id=1).count() - population_with_dose
 
-
-	dose = Dose.objects.filter(chemical_id=chemical,
-							   runparams_id=run_params_id).values('id', 'day', 'dir_derm_abs', 'dir_ingest_abs',
-																  'dir_inhal_abs', 'ind_derm_abs', 'ind_inhal_abs',
-																  'ind_ingest_abs')
+	dose = Dose.objects.filter(chemical_id=chemical, runparams_id=run_params_id).values('id', 'day', 'dir_derm_abs', 'dir_ingest_abs', 'dir_inhal_abs', 'ind_derm_abs', 'ind_inhal_abs', 'ind_ingest_abs')
 	data = pd.DataFrame(list(dose))
 
 	# Magic from Katherine Phillips
-	data = data[['id', 'day', 'dir_derm_abs', 'dir_ingest_abs', 'dir_inhal_abs', 'ind_derm_abs', 'ind_inhal_abs',
-				 'ind_ingest_abs']].copy()
+	#data = data[['id','day','dir_derm_abs','dir_ingest_abs','dir_inhal_abs','ind_derm_abs','ind_inhal_abs','ind_ingest_abs']].copy()
 	# the year in the model is only 364 days. WTF? This is how science works.
 	n_days = 364
 	# get the next person id available to the dataframe
 	person_next_id = Person.objects.all().order_by("-id")[0].id + 1
-	print('next person id = %i' % person_next_id)
 	n_people = person_next_id
 	data_null = pd.DataFrame({'id': pd.np.repeat(pd.np.arange(0, population_null) + n_people, n_days),
 							  "day": pd.np.tile(pd.np.arange(1, n_days + 1), population_null),
@@ -106,13 +100,13 @@ def get_chemical_data(chemical, run_history):
 							  "ind_derm_abs": pd.np.zeros(shape=(population_null * n_days)),
 							  "ind_inhal_abs": pd.np.zeros(shape=(population_null * n_days)),
 							  "ind_ingest_abs": pd.np.zeros(shape=(population_null * n_days))})
-	data_null = data_null[['id', 'day', 'dir_derm_abs', 'dir_ingest_abs', 'dir_inhal_abs', 'ind_derm_abs',
-						   'ind_inhal_abs', 'ind_ingest_abs']].copy()
+	data_null = data_null[['id', 'day', 'dir_derm_abs', 'dir_ingest_abs', 'dir_inhal_abs', 'ind_derm_abs', 'ind_inhal_abs', 'ind_ingest_abs']].copy()
 
 	# Combine data and data_null into one DataFrame
 	data = pd.concat([data, data_null])
 	data['day_sys_dose'] = data.dir_derm_abs + data.dir_ingest_abs + data.dir_inhal_abs + data.ind_derm_abs + data.ind_inhal_abs + data.ind_ingest_abs
 
+	#data = data.ix[data.index[data.day_sys_dose < 0], :].copy()
 	ann_sys_dose = data.groupby(['id']).day_sys_dose.mean().reset_index()
 	weights = pd.np.ones_like(ann_sys_dose.day_sys_dose.tolist()) / len(ann_sys_dose.day_sys_dose.tolist())
 	hist, bin_edges = pd.np.histogram(ann_sys_dose.day_sys_dose, weights=weights * 100, bins=30)
