@@ -3,7 +3,7 @@ from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
 from django.conf import settings
 from .forms import RunForm
-from .models import Product, Chemical, RunHistory
+from .models import Product, Chemical, RunHistory, Dose, RunParams
 from django.utils import timezone
 from djqscsv import render_to_csv_response
 from .analysis_funcs import get_chemical_data, get_dose_qs, get_population_qs, get_lcia_qs
@@ -56,15 +56,27 @@ def hem_results(request):
 
 	#TODO Logic for products and chemicals -> only chemical now
 	if rh.is_product == 0:
+		product = None
 		chemical = rh.chemical_id
 		plot_data = get_chemical_data(chemical, rh)
 		c = Chemical.objects.get(pk=chemical)
 		chem = [{'name': c.title, 'cas': c.cas, 'dtxsid': c.dtxsid, 'plot_data': plot_data,
 				 'plot_color': colors[0]}]
 	else:
-		print("put multichems here")
+		# find the product in runparams
+		product = Product.objects.get(pk=rh.product_id)
+		runparams = RunParams.objects.get(product=product)
+		# choose dose with that product
+		dose = Dose.objects.filter(runparams_id=runparams.id)
+		# get list of chemicals in that dose
+		chemicals = Chemical.objects.filter(dose__in=dose).distinct()
+		#iterate over chemicals
+		chem = []
+		for idx, c in enumerate(chemicals):
+			plot_data = get_chemical_data(int(c.id), rh)
+			chem.append({'name': c.title, 'cas': c.cas, 'dtxsid': c.dtxsid, 'plot_data': plot_data, 'plot_color': colors[idx]})
 
-	products = Product.objects.get(pk=rh.product_id)
+	print chem
 	population = get_population_qs(rh.id).count()
 
 	html = render_to_string('hem_results.html')
@@ -72,19 +84,19 @@ def hem_results(request):
 	response.write(html)
 	return render(request, 'hem_results.html', {'pfile_name': pfile_name, 'dfile_name': dfile_name,
 												'run_history_id': run_history_id, 'chem': chem, 'rh': rh,
-												'products': products, 'population': population})
+												'product': product, 'population': population})
 
 def hem_results_population_csv(request):
 	run_history_id = request.session.get('run_history_id')
 	qs = get_population_qs(run_history_id)
 	file_name = 'population_' + str(run_history_id)
-	return render_to_csv_response(qs, file_name)
+	return render_to_csv_response(qs, file_name, streaming=True)
 
 def hem_results_dose_csv(request):
 	run_history_id = request.session.get('run_history_id')
 	qs = get_dose_qs(run_history_id)
 	file_name = 'dose_' + str(run_history_id)
-	return render_to_csv_response(qs, file_name)
+	return render_to_csv_response(qs, file_name, streaming=True)
 
 def hem_results_lcia_csv(request):
 	run_history_id = request.session.get('run_history_id')
