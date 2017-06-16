@@ -73,16 +73,18 @@ def get_chemical_data(chemical, run_history):
 		# only grab the dose for All products run params
 		all_cat_id = int(Category.objects.filter(parent_id=None).first().id)
 		run_params_id = int(RunParams.objects.filter(category_id=all_cat_id).first().id)
-		population_with_dose = Person.objects.filter(dose__runparams_id=run_params_id,
-													 dose__chemical=chemical).distinct().count()
-		population_null = Person.objects.filter(dataset_id=1).count() - population_with_dose
-	else:
-		run_params_id = int(RunParams.objects.filter(product_id=run_history.product_id).first().id)
-		population_with_dose = Person.objects.filter(dose__runparams_id=run_params_id,
-													 dose__chemical=chemical).distinct().count()
-		population_null = Person.objects.filter(dataset_id=1).count() - population_with_dose
 
-	dose = Dose.objects.filter(chemical_id=chemical, runparams_id=run_params_id).values('id', 'day', 'dir_derm_abs', 'dir_ingest_abs', 'dir_inhal_abs', 'ind_derm_abs', 'ind_inhal_abs', 'ind_ingest_abs')
+	else:
+		# only grab the dose for the chemical
+		run_params_id = int(RunParams.objects.filter(product_id=run_history.product_id).first().id)
+
+	population_with_dose = Person.objects.filter(dose__runparams_id=run_params_id,
+												 dose__chemical=chemical).distinct().count()
+	population_null = Person.objects.filter(dataset_id=1).count() - population_with_dose
+	dose = Dose.objects.filter(chemical_id=chemical,
+							   runparams_id=run_params_id).values('id', 'day', 'dir_derm_abs', 'dir_ingest_abs',
+																  'dir_inhal_abs', 'ind_derm_abs', 'ind_inhal_abs',
+																  'ind_ingest_abs')
 	data = pd.DataFrame(list(dose))
 
 	# Magic from Katherine Phillips
@@ -100,13 +102,12 @@ def get_chemical_data(chemical, run_history):
 							  "ind_derm_abs": pd.np.zeros(shape=(population_null * n_days)),
 							  "ind_inhal_abs": pd.np.zeros(shape=(population_null * n_days)),
 							  "ind_ingest_abs": pd.np.zeros(shape=(population_null * n_days))})
-	data_null = data_null[['id', 'day', 'dir_derm_abs', 'dir_ingest_abs', 'dir_inhal_abs', 'ind_derm_abs', 'ind_inhal_abs', 'ind_ingest_abs']].copy()
-
+	data_null = data_null[['id', 'day', 'dir_derm_abs', 'dir_ingest_abs', 'dir_inhal_abs', 'ind_derm_abs',
+						   'ind_inhal_abs', 'ind_ingest_abs']].copy()
 	# Combine data and data_null into one DataFrame
 	data = pd.concat([data, data_null])
-	data['day_sys_dose'] = data.dir_derm_abs + data.dir_ingest_abs + data.dir_inhal_abs + data.ind_derm_abs + data.ind_inhal_abs + data.ind_ingest_abs
-
-	#data = data.ix[data.index[data.day_sys_dose < 0], :].copy()
+	data['day_sys_dose'] = data.dir_derm_abs + data.dir_ingest_abs + data.dir_inhal_abs + data.ind_derm_abs + \
+						   data.ind_inhal_abs + data.ind_ingest_abs
 	ann_sys_dose = data.groupby(['id']).day_sys_dose.mean().reset_index()
 	weights = pd.np.ones_like(ann_sys_dose.day_sys_dose.tolist()) / len(ann_sys_dose.day_sys_dose.tolist())
 	hist, bin_edges = pd.np.histogram(ann_sys_dose.day_sys_dose, weights=weights * 100, bins=30)
