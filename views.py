@@ -54,7 +54,6 @@ def hem_results(request):
 			  'rgba(217, 217, 217, .5)', 'rgba(188, 128, 189, .5)', 'rgba(204, 235, 197, .5)',
 			  'rgba(255, 237, 111, .5)']
 
-	#TODO Logic for products and chemicals -> only chemical now
 	if rh.is_product == 0:
 		product = None
 		chemical = rh.chemical_id
