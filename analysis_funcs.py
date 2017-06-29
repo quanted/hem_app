@@ -69,6 +69,10 @@ def get_population_qs(h):
 
 
 def get_chemical_data(chemical, run_history):
+	# filter to get the people selected in form
+	population = get_population_qs(run_history.id)
+	population_ids = population.values('id')
+
 	if run_history.is_product == 0:
 		# only grab the dose for All products run params
 		all_cat_id = int(Category.objects.filter(parent_id=None).first().id)
@@ -81,14 +85,15 @@ def get_chemical_data(chemical, run_history):
 	population_with_dose = Person.objects.filter(dose__runparams_id=run_params_id,
 												 dose__chemical=chemical).distinct().count()
 	population_null = Person.objects.filter(dataset_id=1).count() - population_with_dose
-	dose = Dose.objects.filter(chemical_id=chemical,
-							   runparams_id=run_params_id).values('id', 'day', 'dir_derm_abs', 'dir_ingest_abs',
-																  'dir_inhal_abs', 'ind_derm_abs', 'ind_inhal_abs',
-																  'ind_ingest_abs')
+	dose = Dose.objects.filter(person_id__in=population_ids)
+	dose = dose.filter(chemical_id=chemical,
+					   runparams_id=run_params_id).values('id', 'day', 'dir_derm_abs', 'dir_ingest_abs',
+														  'dir_inhal_abs', 'ind_derm_abs', 'ind_inhal_abs',
+														  'ind_ingest_abs')
 	data = pd.DataFrame(list(dose))
 
 	# Magic from Katherine Phillips
-	#data = data[['id','day','dir_derm_abs','dir_ingest_abs','dir_inhal_abs','ind_derm_abs','ind_inhal_abs','ind_ingest_abs']].copy()
+	# data = data[['id','day','dir_derm_abs','dir_ingest_abs','dir_inhal_abs','ind_derm_abs','ind_inhal_abs','ind_ingest_abs']].copy()
 	# the year in the model is only 364 days. WTF? This is how science works.
 	n_days = 364
 	# get the next person id available to the dataframe
