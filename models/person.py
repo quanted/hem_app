@@ -4,10 +4,10 @@ from django.db import models
 class Person(models.Model):
     """ Person Category Model """
     dataset_id = models.IntegerField(default=1)
-    gender = models.CharField(max_length=1)
+    gender = models.CharField(max_length=1, db_index=True)
     race = models.CharField(max_length=1)
     ethnicity = models.CharField(max_length=1, default='W')
-    age_years = models.IntegerField(default=1)
+    age_years = models.IntegerField(default=1, db_index=True)
     ages = models.TextField(max_length=30)
     baths = models.IntegerField(default=1)
     bsa_adj = models.DecimalField(max_digits=10, decimal_places=3, default=0)
@@ -35,6 +35,3 @@ class Person(models.Model):
 
     def __str__(self):
         return self.id
-
-    class Meta:
-        ordering = ('id',)

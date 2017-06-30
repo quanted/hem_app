@@ -39,3 +39,4 @@ handler404 = views.file_not_found
 handler500 = views.file_not_found
 # 403 Error view (forbidden)
 handler403 = views.file_not_found
+

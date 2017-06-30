@@ -18,6 +18,3 @@ class RunParams(models.Model):
 
     def __str__(self):
         return str(self.population_size)
-
-    class Meta:
-        ordering = ('population_size',)
