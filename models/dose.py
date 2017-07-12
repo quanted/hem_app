@@ -38,6 +38,3 @@ class Dose(models.Model):
 
     def __unicode__(self):
         return unicode(self.id) or u''
-
-    class Meta:
-        ordering = ('id',)

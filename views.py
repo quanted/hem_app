@@ -72,7 +72,9 @@ def hem_results(request):
 		#iterate over chemicals
 		chem = []
 		for idx, c in enumerate(chemicals):
-			plot_data = get_chemical_data(int(c.id), rh)
+			print("start plot data")
+			plot_data = get_chemical_data(c.id, rh)
+			print("end plot data")
 			chem.append({'name': c.title, 'cas': c.cas, 'dtxsid': c.dtxsid, 'plot_data': plot_data, 'plot_color': colors[idx]})
 
 	print chem

@@ -27,5 +27,4 @@ class Behavior(models.Model):
         return self.id
 
     class Meta:
-        ordering = ('person', 'dataset_id')
         verbose_name_plural = 'behave_people'

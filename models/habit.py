@@ -16,6 +16,3 @@ class Habit(models.Model):
 
     def __str__(self):
         return self.puc_id
-
-    class Meta:
-        ordering = ('id',)
