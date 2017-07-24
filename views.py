@@ -6,7 +6,7 @@ from .forms import RunForm
 from .models import Product, Chemical, RunHistory, Dose, RunParams
 from django.utils import timezone
 from djqscsv import render_to_csv_response
-from .analysis_funcs import get_chemical_data, get_dose_qs, get_population_qs, get_lcia_qs
+from .analysis_funcs import get_chemical_data, get_dose_qs, get_population_qs
 
 
 def hem_landing_page(request):
