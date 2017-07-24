@@ -1,23 +1,5 @@
-from hem_app.models import Dose, Category, RunParams, LifeCycleImpact, RunHistory, Chemical, Person
+from hem_app.models import Dose, Category, RunParams, RunHistory, Chemical, Person
 import pandas as pd
-
-
-def get_lcia_qs(h):
-	history = RunHistory.objects.get(pk=h)
-	# find the run params id for the category in runhistory
-	rp = RunParams.objects.filter(category=history.categories.id).first()
-	# all rows in lifecycle that have the run params id
-	lcia = LifeCycleImpact.objects.filter(runparams_id=rp.id).values('chemical__cas', 'chemical__title', 'runparams_id',
-																	 'mass_frac_chem_puc', 'mass_puc_use_adult',
-																	 'pif_derm_adult', 'pif_inhal_adult',
-																	 'pif_inhal_adult', 'mass_puc_use_child',
-																	 'pif_derm_child', 'pif_inhal_child',
-																	 'pif_ingest_child', 'chem_mass',
-																	 'mass_tot_air', 'mass_tot_water',
-																	 'mass_tot_land', 'runparams__category__title',
-																	 'runparams__product__title')
-
-	return lcia
 
 
 def get_dose_qs(h):
