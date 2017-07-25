@@ -1,5 +1,5 @@
 from django.template.loader import render_to_string
-from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
+from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.conf import settings
 from .forms import RunForm
@@ -16,10 +16,8 @@ def hem_landing_page(request):
 	html += render_to_string('03epa_drupal_section_title.html', {})
 	if settings.IS_PUBLIC:
 		html += render_to_string('hem_popgen.html', {'title': 'Human Exposure Model'})
-		pass
 	else:
 		html += render_to_string('hem_popgen.html', {'title': 'Human Exposure Model'})
-		pass
 	html += render_to_string('09epa_drupal_splashscripts.html', {})
 	html += render_to_string('10epa_drupal_footer.html', {})
 	response = HttpResponse()
@@ -124,4 +122,8 @@ def hem_index(request):
 			return HttpResponseRedirect('results', {'runHistory': history})
 
 	return render(request, 'hem_index.html', {'form': form})
+
+
+def hem_about(request):
+	return render(request, 'hem_about.html')
 
