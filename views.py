@@ -5,7 +5,6 @@ from django.conf import settings
 from .forms import RunForm
 from .models import Product, Chemical, RunHistory, Dose, RunParams
 from django.utils import timezone
-from djqscsv import render_to_csv_response
 from .analysis_funcs import get_chemical_data, get_dose_qs, get_population_qs
 
 
@@ -75,7 +74,7 @@ def hem_results(request):
 			print("end plot data")
 			chem.append({'name': c.title, 'cas': c.cas, 'dtxsid': c.dtxsid, 'plot_data': plot_data, 'plot_color': colors[idx]})
 
-	print chem
+	print(chem)
 	population = get_population_qs(rh.id).count()
 
 	html = render_to_string('hem_results.html')
@@ -84,25 +83,6 @@ def hem_results(request):
 	return render(request, 'hem_results.html', {'pfile_name': pfile_name, 'dfile_name': dfile_name,
 												'run_history_id': run_history_id, 'chem': chem, 'rh': rh,
 												'product': product, 'population': population})
-
-def hem_results_population_csv(request):
-	run_history_id = request.session.get('run_history_id')
-	qs = get_population_qs(run_history_id)
-	file_name = 'population_' + str(run_history_id)
-	return render_to_csv_response(qs, file_name, streaming=True)
-
-def hem_results_dose_csv(request):
-	run_history_id = request.session.get('run_history_id')
-	qs = get_dose_qs(run_history_id)
-	file_name = 'dose_' + str(run_history_id)
-	return render_to_csv_response(qs, file_name, streaming=True)
-
-def hem_results_lcia_csv(request):
-	run_history_id = request.session.get('run_history_id')
-	qs = get_lcia_qs(run_history_id)
-	file_name = 'lcia_' + str(run_history_id)
-	return render_to_csv_response(qs, file_name)
-
 
 def hem_index(request):
 	form = RunForm()
