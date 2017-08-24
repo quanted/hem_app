@@ -116,7 +116,7 @@ def get_chemical_data(chemical, run_history):
 	json_data = {'dose': []}
 
 	for i in range(0, len(cum_dist)):
-		json_data['dose'].append([bin_centers[i], cum_dist[i]])
+		json_data['dose'].append([cum_dist[i], bin_centers[i]])
 
 	return json_data
 

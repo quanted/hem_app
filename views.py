@@ -43,8 +43,6 @@ def hem_results(request):
 	run_history_id = request.session.get('run_history_id')
 	rh = RunHistory.objects.get(pk=int(run_history_id))
 
-	pfile_name = 'population_' + str(run_history_id)
-	dfile_name = 'dose_' + str(run_history_id)
 	colors = ['rgba(119, 152, 191, .5)', 'rgba(141, 211, 199, .5)', 'rgba(150, 255, 179, .7)',
 			  'rgba(190, 186, 218, .5)', 'rgba(251, 128, 114, .5)', 'rgba(128, 177, 211, .5)',
 			  'rgba(253, 180, 98, .5)', 'rgba(179, 222, 105, .5)', 'rgba(252, 205, 229, .5)',
@@ -88,8 +86,7 @@ def hem_results(request):
 	html = render_to_string('hem_results.html')
 	response = HttpResponse()
 	response.write(html)
-	return render(request, 'hem_results.html', {'pfile_name': pfile_name, 'dfile_name': dfile_name,
-												'run_history_id': run_history_id, 'chem': chem, 'rh': rh,
+	return render(request, 'hem_results.html', {'run_history_id': run_history_id, 'chem': chem, 'rh': rh,
 												'product': product, 'population': population})
 
 def hem_index(request):
