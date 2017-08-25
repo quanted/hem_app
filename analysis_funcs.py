@@ -69,10 +69,12 @@ def get_chemical_data(chemical, run_history):
 	# TODO First operand needs to be total people of age and gender of interest
 	population_with_dose = population.filter(dose__runparams_id=run_params_id,
 												 dose__chemical=chemical).distinct().count()
+	print("population with dose = " + str(population_with_dose))
 	print('end pop with dose, start null pop :' + str(datetime.now()))
 
 	# TODO First operand needs to be total people of age and gender of interest
-	population_null = Person.objects.filter(dataset_id=1).count() - population_with_dose
+	population_null = population.count() - population_with_dose
+	print("population null = " + str(population_null))
 	print('end null pop, start dose :' + str(datetime.now()))
 	dose = Dose.objects.filter(person_id__in=population_ids)
 	print('end dose, start more dose :' + str(datetime.now()))
