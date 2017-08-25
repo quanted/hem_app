@@ -1,5 +1,6 @@
 from hem_app.models import Dose, Category, RunParams, RunHistory, Chemical, Person
 import pandas as pd
+from datetime import datetime
 
 
 def get_dose_qs(h):
@@ -25,12 +26,9 @@ def get_dose_qs(h):
 		rp = RunParams.objects.filter(category__category__runparams=None).first().id
 		chem_id = Chemical.objects.get(pk=history.chemical_id)
 		dose = dose.filter(chemical_id=chem_id, runparams_id=rp)
-		print(dose.count())
 	else:
 		rp = RunParams.objects.filter(product_id=history.product_id).first().id
 		dose = dose.filter(runparams_id=rp)
-		print(dose.count())
-
 	return dose
 
 
@@ -55,12 +53,9 @@ def get_population_qs(h):
 def get_chemical_data(chemical, run_history):
 	# filter to get the people selected in form
 	################################
-	# This block is taking way too long
-	print('start pop')
+	# TODO This block is taking way too long
 	population = get_population_qs(run_history.id)
-	print('end pop, start ids')
 	population_ids = population.values('id')
-	print('end ids, start runparams')
 	if run_history.is_product == 0:
 		# only grab the dose for All products run params
 		all_cat_id = int(Category.objects.filter(parent_id=None).first().id)
@@ -69,22 +64,27 @@ def get_chemical_data(chemical, run_history):
 	else:
 		# only grab the dose for the chemical
 		run_params_id = int(RunParams.objects.filter(product_id=run_history.product_id).first().id)
-	print('end runparams, start pop with dose')
+	print('end runparams, start pop with dose :' + str(datetime.now()))
 
+	# TODO First operand needs to be total people of age and gender of interest
 	population_with_dose = population.filter(dose__runparams_id=run_params_id,
 												 dose__chemical=chemical).distinct().count()
-	print('end pop with dose, start null pop')
-	population_null = Person.objects.filter(dataset_id=1).count() - population_with_dose
-	print('end null pop, start dose')
+	print("population with dose = " + str(population_with_dose))
+	print('end pop with dose, start null pop :' + str(datetime.now()))
+
+	# TODO First operand needs to be total people of age and gender of interest
+	population_null = population.count() - population_with_dose
+	print("population null = " + str(population_null))
+	print('end null pop, start dose :' + str(datetime.now()))
 	dose = Dose.objects.filter(person_id__in=population_ids)
-	print('end dose, start more dose')
+	print('end dose, start more dose :' + str(datetime.now()))
 	dose = dose.filter(chemical_id=chemical,
 					   runparams_id=run_params_id).values('id', 'day', 'dir_derm_abs', 'dir_ingest_abs',
 														  'dir_inhal_abs', 'ind_derm_abs', 'ind_inhal_abs',
 														  'ind_ingest_abs')
-	print('end more dose, start data')
+	print('end more dose, start data :' + str(datetime.now()))
 	data = pd.DataFrame(list(dose))
-	print('end data')
+	print('end data :' + str(datetime.now()))
 	# This block is taking way to long
 	############################
 
@@ -111,14 +111,14 @@ def get_chemical_data(chemical, run_history):
 						   data.ind_inhal_abs + data.ind_ingest_abs
 	ann_sys_dose = data.groupby(['id']).day_sys_dose.mean().reset_index()
 	weights = pd.np.ones_like(ann_sys_dose.day_sys_dose.tolist()) / len(ann_sys_dose.day_sys_dose.tolist())
-	hist, bin_edges = pd.np.histogram(ann_sys_dose.day_sys_dose, weights=weights * 100, bins=15)
+	hist, bin_edges = pd.np.histogram(ann_sys_dose.day_sys_dose, weights=weights * 100, bins=50)
 	bin_centers = (bin_edges[:-1] + bin_edges[1:]) / 2.
 	cum_dist = pd.np.cumsum(hist)
 
 	json_data = {'dose': []}
 
 	for i in range(0, len(cum_dist)):
-		json_data['dose'].append([bin_centers[i], cum_dist[i]])
+		json_data['dose'].append([cum_dist[i], bin_centers[i]])
 
 	return json_data
 

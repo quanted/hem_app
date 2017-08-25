@@ -14,8 +14,8 @@ PRODUCT_CHOICES = (
 )
 
 class RunForm(forms.ModelForm):
-
-	chemical = forms.ModelChoiceField(queryset=Chemical.objects.filter(id__in=Dose.objects.values('chemical_id')),
+	dose = Dose.objects.filter(runparams_id=1).distinct().values('chemical_id')
+	chemical = forms.ModelChoiceField(queryset=Chemical.objects.filter(id__in=dose),
 									  empty_label=None, to_field_name='cas')
 
 	product = forms.ModelChoiceField(queryset=Product.objects.filter(id__in=RunParams.objects.values('product_id')),

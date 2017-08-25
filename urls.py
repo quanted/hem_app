@@ -12,6 +12,7 @@ if settings.IS_PUBLIC:
         url(r'^$', views.hem_landing_page),
         url(r'^index/?$', views.hem_index),
         url(r'^results/?$', views.hem_results),
+        url(r'^about/?$', views.hem_about),
         # url(r'^admin/', include(admin.site.urls)),
     ]
 else:
@@ -22,6 +23,7 @@ else:
         url(r'^$', views.hem_landing_page),
         url(r'^index/?$', views.hem_index),
         url(r'^results/?$', views.hem_results),
+        url(r'^about/?$', views.hem_about),
         # url(r'^$', views.qed_splash_page_intrane
         #url(r'^$', views.qed_splash_page_intranet),
         # url(r'^admin/', include(admin.site.urls)),

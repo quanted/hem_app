@@ -1,11 +1,10 @@
 from django.template.loader import render_to_string
-from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
+from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.conf import settings
 from .forms import RunForm
 from .models import Product, Chemical, RunHistory, Dose, RunParams
 from django.utils import timezone
-from djqscsv import render_to_csv_response
 from .analysis_funcs import get_chemical_data, get_dose_qs, get_population_qs
 
 
@@ -16,10 +15,8 @@ def hem_landing_page(request):
 	html += render_to_string('03epa_drupal_section_title.html', {})
 	if settings.IS_PUBLIC:
 		html += render_to_string('hem_popgen.html', {'title': 'Human Exposure Model'})
-		pass
 	else:
 		html += render_to_string('hem_popgen.html', {'title': 'Human Exposure Model'})
-		pass
 	html += render_to_string('09epa_drupal_splashscripts.html', {})
 	html += render_to_string('10epa_drupal_footer.html', {})
 	response = HttpResponse()
@@ -46,13 +43,19 @@ def hem_results(request):
 	run_history_id = request.session.get('run_history_id')
 	rh = RunHistory.objects.get(pk=int(run_history_id))
 
-	pfile_name = 'population_' + str(run_history_id)
-	dfile_name = 'dose_' + str(run_history_id)
 	colors = ['rgba(119, 152, 191, .5)', 'rgba(141, 211, 199, .5)', 'rgba(150, 255, 179, .7)',
 			  'rgba(190, 186, 218, .5)', 'rgba(251, 128, 114, .5)', 'rgba(128, 177, 211, .5)',
 			  'rgba(253, 180, 98, .5)', 'rgba(179, 222, 105, .5)', 'rgba(252, 205, 229, .5)',
 			  'rgba(217, 217, 217, .5)', 'rgba(188, 128, 189, .5)', 'rgba(204, 235, 197, .5)',
-			  'rgba(255, 237, 111, .5)']
+			  'rgba(255, 237, 111, .5)', 'rgba(119, 152, 191, .5)', 'rgba(141, 211, 199, .5)',
+			  'rgba(150, 255, 179, .7)', 'rgba(190, 186, 218, .5)', 'rgba(251, 128, 114, .5)',
+			  'rgba(128, 177, 211, .5)', 'rgba(253, 180, 98, .5)', 'rgba(179, 222, 105, .5)',
+			  'rgba(252, 205, 229, .5)', 'rgba(217, 217, 217, .5)', 'rgba(188, 128, 189, .5)',
+			  'rgba(204, 235, 197, .5)', 'rgba(255, 237, 111, .5)', 'rgba(119, 152, 191, .5)',
+			  'rgba(141, 211, 199, .5)', 'rgba(150, 255, 179, .7)', 'rgba(190, 186, 218, .5)',
+			  'rgba(251, 128, 114, .5)', 'rgba(128, 177, 211, .5)', 'rgba(253, 180, 98, .5)',
+			  'rgba(179, 222, 105, .5)', 'rgba(252, 205, 229, .5)', 'rgba(217, 217, 217, .5)',
+			  'rgba(188, 128, 189, .5)', 'rgba(204, 235, 197, .5)', 'rgba(255, 237, 111, .5)']
 
 	if rh.is_product == 0:
 		product = None
@@ -77,34 +80,14 @@ def hem_results(request):
 			print("end plot data")
 			chem.append({'name': c.title, 'cas': c.cas, 'dtxsid': c.dtxsid, 'plot_data': plot_data, 'plot_color': colors[idx]})
 
-	print chem
+	print(chem)
 	population = get_population_qs(rh.id).count()
 
 	html = render_to_string('hem_results.html')
 	response = HttpResponse()
 	response.write(html)
-	return render(request, 'hem_results.html', {'pfile_name': pfile_name, 'dfile_name': dfile_name,
-												'run_history_id': run_history_id, 'chem': chem, 'rh': rh,
+	return render(request, 'hem_results.html', {'run_history_id': run_history_id, 'chem': chem, 'rh': rh,
 												'product': product, 'population': population})
-
-def hem_results_population_csv(request):
-	run_history_id = request.session.get('run_history_id')
-	qs = get_population_qs(run_history_id)
-	file_name = 'population_' + str(run_history_id)
-	return render_to_csv_response(qs, file_name, streaming=True)
-
-def hem_results_dose_csv(request):
-	run_history_id = request.session.get('run_history_id')
-	qs = get_dose_qs(run_history_id)
-	file_name = 'dose_' + str(run_history_id)
-	return render_to_csv_response(qs, file_name, streaming=True)
-
-def hem_results_lcia_csv(request):
-	run_history_id = request.session.get('run_history_id')
-	qs = get_lcia_qs(run_history_id)
-	file_name = 'lcia_' + str(run_history_id)
-	return render_to_csv_response(qs, file_name)
-
 
 def hem_index(request):
 	form = RunForm()
@@ -124,4 +107,8 @@ def hem_index(request):
 			return HttpResponseRedirect('results', {'runHistory': history})
 
 	return render(request, 'hem_index.html', {'form': form})
+
+
+def hem_about(request):
+	return render(request, 'hem_about.html')
 
